@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 LABEL Maintainer="Pierre-Yves Lajoie <lajoie.py@gmail.com>"
-LABEL robust-multi-robot-slam-simulation.version="0.1"
+LABEL drone-rescue-simulation.version="0.1"
 
 # Install common dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,29 +14,6 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Install GTSAM
-RUN apt-get update && apt-get install -y \
-    libboost-all-dev \
-    cmake \
-    libtbb-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN git clone https://bitbucket.org/gtborg/gtsam && \
-    cd gtsam && \
-    git checkout develop && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make -j2 && \
-    make install
-
-# Install Eigen3 (packaged in GTSAM)
-RUN cd gtsam/gtsam/3rdparty/Eigen && \
-    mkdir build && \
-    cd build && \
-    cmake .. &&\
-    make install
-
 # Install ARGoS
 RUN apt-get update && apt-get install -y \
     wget \
@@ -49,8 +26,11 @@ RUN apt-get update && apt-get install -y \
     liblua5.2-dev \
     lua5.2 \
     && rm -rf /var/lib/apt/lists/*
+    
+COPY argos3_simulator-3.0.0-x86_64-beta56.deb .
 
-RUN wget -O argos3-package.deb https://drive.google.com/uc\?authuser\=0\&id\=1VGDogC8tBipOv2kykJH4hsckXoBRKmFa\&export\=download
+RUN apt-get update && \ 
+    apt-get install -y liblua5.3-dev lua5.3 cmake
 
 RUN apt-get update && \
     apt-get -y install sudo
@@ -58,7 +38,7 @@ RUN adduser --disabled-password --gecos '' docker
 RUN adduser docker sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER docker
-RUN sudo dpkg -i argos3-package.deb
+RUN sudo dpkg -i argos3_simulator-3.0.0-x86_64-beta56.deb
 RUN sudo chmod -R ugo+rw /home/docker
 USER root
 
@@ -86,44 +66,38 @@ RUN mkdir /home/docker/code &&\
 RUN touch /home/docker/code/User/settings.json &&\
     echo "{ \"files.associations\": { \"*.bzz\":\"python\" } }" > /home/docker/code/User/settings.json
 
+# Setup debug config for visual studio code
+RUN mkdir /home/docker/simulation && \
+    mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\
+    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
+    > /home/docker/simulation/.vscode/launch.json
+    
+# Setup deployment key
+RUN mkdir /root/.ssh/
+ADD repo-key /root/.ssh/id_rsa
+RUN touch /root/.ssh/known_hosts && \ 
+  ssh-keyscan github.com >> /root/.ssh/known_hosts
+
 # Add dummy argument to force rebuild starting from that point
 ARG CODE_UPDATE=unknown
 
 # Clone simulation
-RUN git clone https://github.com/lajoiepy/robust_distributed_slam_simulation.git /home/docker/robust_distributed_slam_simulation &&\
-    cd /home/docker/robust_distributed_slam_simulation &&\
+RUN cd /home/docker/simulation &&\
+    git init &&\
+    git remote add origin git@github.com:lajoiepy/drone-rescue-simulation.git &&\
+    git pull origin master &&\
     git submodule update --init --recursive
 
-# Install Robust Distributed Mapper
-RUN cd /home/docker/robust_distributed_slam_simulation/buzz_slam/robust_distributed_mapper/cpp &&\
-    mkdir build &&\
-    cd build &&\
-    cmake -DCMAKE_BUILD_TYPE=Debug ../ &&\
-    make &&\
-    make install
-
-# Install Buzz SLAM
-RUN cd /home/docker/robust_distributed_slam_simulation/buzz_slam &&\
-    mkdir build &&\
-    cd build &&\
-    cmake -DCMAKE_BUILD_TYPE=Debug -DIRL_ROBOT=off -DROS_IRL_ROBOT=off -DARGOS_SIMULATION=on ../src &&\
-    make &&\
-    make install
-
 # Compile buzz script
-RUN cd /home/docker/robust_distributed_slam_simulation/argos_simulation &&\
-    bzzc random_walk_mapping.bzz &&\
-    bzzc dataset_mapping.bzz
-
-# Setup debug config for visual studio code
-RUN mkdir /home/docker/robust_distributed_slam_simulation/.vscode && touch /home/docker/robust_distributed_slam_simulation/.vscode/launch.json &&\
-    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
-    > /home/docker/robust_distributed_slam_simulation/.vscode/launch.json
+RUN cd /home/docker/simulation/argos_simulation 
+    #&&\
+    #bzzc random_walk_mapping.bzz &&\
+    #bzzc dataset_mapping.bzz
 
 # Put your own git credentials to commit edited code
 RUN git config --global user.email "lajoie.py@gmail.com" &&\
     git config --global user.name "Pierre-Yves Lajoie"
 
 # Entry point to start the simulation
-WORKDIR /home/docker/robust_distributed_slam_simulation/argos_simulation
+WORKDIR /home/docker/simulation/argos_simulation
 # ENTRYPOINT argos3 -c robust_distributed_slam.argos
