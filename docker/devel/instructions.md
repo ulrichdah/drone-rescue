@@ -2,20 +2,22 @@
 The ARGoS simulation needs access to a graphical user interface to work. Many options are available to have access to the GUI of the apps running in your docker container. I propose using https://github.com/mviereck/x11docker, but feel free to use another one. Note that I will assume the usage of x11docker in some of the following commands.
 
 # Build the image
+You need to download the ARGoS simulator from https://www.argos-sim.info/core.php and update the version number in the docker file.
+
 For the first build execute: 
 ```
-docker build . --tag rdpgo --network host
+docker build . --tag drone-rescue-simulation --network host
 ```
 If you modified the code from this repository and you want to use the latest version, use the following command: 
 ```
-docker build . --tag rdpgo --network host --build-arg CODE_UPDATE=<dummy-arg>
+docker build . --tag drone-rescue-simulation --network host --build-arg CODE_UPDATE=<dummy-arg>
 ```
 Be sure to change the `CODE_UPDATE` value every time to invalidate your build cache.
 
 # To run a container
 Use the following command while specifying a folder on your host machine to store the log files from the simulation. 
 ```
-sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/robust_distributed_slam_simulation/argos_simulation/log -- rdpgo:latest
+sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/simulation/argos_simulation/log -- drone-rescue-simulation:latest
 ```
 
 # Launching the simulation
@@ -26,7 +28,7 @@ docker exec -w /home/docker/robust_distributed_slam_simulation/argos_simulation 
 ```
 You can check the `<container-name>` using `docker ps`. 
 
-Then you can start the simulation yourself by going into the folder `/home/docker/robust_distributed_slam_simulation/argos_simulation`
+Then you can start the simulation yourself by going into the folder `/home/docker/simulation/argos_simulation`
 and executing :
 ```
 argos3 -c robust_distributed_slam.argos
@@ -35,7 +37,7 @@ argos3 -c robust_distributed_slam.argos
 # To debug with Visual Studio Code
 Some editing and debugging tools are installed in the image for development purposes (gedit, nano, strace, valgrind, and Visual Studio Code).
 To debug the code from this repository:
-1. Open Visual Studio Code in the folder `/home/docker/robust_distributed_slam_simulation` with the `--user-data-dir /home/docker/code/` argument.
+1. Open Visual Studio Code in the folder `/home/docker/simulation` with the `--user-data-dir /home/docker/code/` argument.
 2. Launch the simulation as explained previously.
 3. Start the `(gdb) Attach` configuration in the Visual Studio Code debugging tool and select the running `argos3` process.
 4. You are ready to place your breakpoints and debug!

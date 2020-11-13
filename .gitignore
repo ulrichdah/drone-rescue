@@ -7,3 +7,4 @@ buzz/build
 argos_simulation/log/fixed_datasets
 argos_simulation/profile.txt
 *.png
+*.deb
