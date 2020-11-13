@@ -1,0 +1,25 @@
+include "buzz_includes/buzz_utils/vec2.bzz"
+include "buzz_includes/buzz_utils/string.bzz"
+include "config/search_example/parameters.bzz"
+include "buzz_includes/search_example/global_variables.bzz"
+include "buzz_includes/debug.bzz"
+
+# Executed at init time
+function init() {
+  # Take off command for the Spiri drone model
+  takeoff()
+
+  # Show trajectory for debugging
+  show_colored_trajectory()
+}
+ 
+# Executed every time step
+function step() {
+  
+  # Increment number of steps
+  current_step_ = current_step_ + 1
+}
+ 
+# Execute at exit
+function destroy() {
+}
