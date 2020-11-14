@@ -74,9 +74,11 @@ RUN mkdir /home/docker/simulation && \
     
 # Setup deployment key
 RUN mkdir /root/.ssh/
-ADD repo-key /root/.ssh/id_rsa
+ADD argos-key /root/.ssh/argos_id_rsa
+ADD controller-key /root/.ssh/controller_id_rsa
 RUN touch /root/.ssh/known_hosts && \ 
   ssh-keyscan github.com >> /root/.ssh/known_hosts
+RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \nIdentityFile ~/.ssh/argos_id_rsa \n\n Host github-controller \nHostName github.com \nUser git \nIdentityFile ~/.ssh/controller_id_rsa" >> ~/.ssh/config
 
 # Add dummy argument to force rebuild starting from that point
 ARG CODE_UPDATE=unknown
@@ -84,9 +86,16 @@ ARG CODE_UPDATE=unknown
 # Clone simulation
 RUN cd /home/docker/simulation &&\
     git init &&\
-    git remote add origin git@github.com:lajoiepy/drone-rescue-simulation.git &&\
+    git remote add origin github-argos:lajoiepy/drone-rescue-simulation.git &&\
     git pull origin master &&\
     git submodule update --init --recursive
+
+# Compile C++ controller
+RUN cd /home/docker/simulation/argos_simulation/controller &&\
+    mkdir build &&\
+    cd build/ &&\
+    cmake ../src &&\
+    make install
 
 # Compile buzz script
 RUN cd /home/docker/simulation/argos_simulation &&\
