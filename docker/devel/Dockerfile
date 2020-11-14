@@ -89,10 +89,8 @@ RUN cd /home/docker/simulation &&\
     git submodule update --init --recursive
 
 # Compile buzz script
-RUN cd /home/docker/simulation/argos_simulation 
-    #&&\
-    #bzzc random_walk_mapping.bzz &&\
-    #bzzc dataset_mapping.bzz
+RUN cd /home/docker/simulation/argos_simulation &&\
+    bzzc search_example.bzz
 
 # Put your own git credentials to commit edited code
 RUN git config --global user.email "lajoie.py@gmail.com" &&\
