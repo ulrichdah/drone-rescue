@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
 COPY argos3_simulator-3.0.0-x86_64-beta56.deb .
 
 RUN apt-get update && \ 
-    apt-get install -y liblua5.3-dev lua5.3 cmake
+    apt-get install -y liblua5.3-dev lua5.3 libboost-filesystem-dev cmake
 
 RUN apt-get update && \
     apt-get -y install sudo
@@ -65,12 +65,6 @@ RUN mkdir /home/docker/code &&\
 # Settings for buzz editing
 RUN touch /home/docker/code/User/settings.json &&\
     echo "{ \"files.associations\": { \"*.bzz\":\"python\" } }" > /home/docker/code/User/settings.json
-
-# Setup debug config for visual studio code
-RUN mkdir /home/docker/simulation && \
-    mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\
-    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
-    > /home/docker/simulation/.vscode/launch.json
     
 # Setup deployment key
 RUN mkdir /root/.ssh/
@@ -84,17 +78,22 @@ RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \
 ARG CODE_UPDATE=unknown
 
 # Clone simulation
-RUN cd /home/docker/simulation &&\
-    git init &&\
-    git remote add origin github-argos:lajoiepy/drone-rescue-simulation.git &&\
-    git pull origin master &&\
+RUN cd /home/docker/ &&\
+    git clone github-argos:lajoiepy/drone-rescue-simulation.git simulation &&\
+    cd simulation &&\
     git submodule update --init --recursive
 
+# Setup debug config for visual studio code
+RUN mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\
+    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
+    > /home/docker/simulation/.vscode/launch.json
+
 # Compile C++ controller
-RUN cd /home/docker/simulation/argos_simulation/controller &&\
+RUN cd /home/docker/simulation/controller &&\
     mkdir build &&\
     cd build/ &&\
     cmake ../src &&\
+    make &&\
     make install
 
 # Compile buzz script
