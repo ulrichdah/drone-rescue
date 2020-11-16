@@ -1,0 +1,27 @@
+include "buzz_includes/buzz_utils/vec2.bzz"
+include "buzz_includes/buzz_utils/string.bzz"
+include "config/search_example/parameters.bzz"
+include "buzz_includes/search_example/global_variables.bzz"
+include "buzz_includes/debug.bzz"
+
+# Executed at init time
+function init() {
+  # Initialize random number generator
+  srand(id)
+
+  # Set initial velocity
+}
+ 
+# Executed every time step
+function step() {  
+  # Increment number of steps
+  current_step_ = current_step_ + 1
+
+  # Change slightly direction
+  set_velocity(1.0,1.0)
+
+}
+ 
+# Execute at exit
+function destroy() {
+}
