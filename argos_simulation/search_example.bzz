@@ -21,6 +21,8 @@ function step() {
   
   # Increment number of steps
   current_step_ = current_step_ + 1
+
+  goto(1,1,1)
 }
  
 # Execute at exit
