@@ -9,6 +9,9 @@ function init() {
   # Take off command for the Spiri drone model
   takeoff()
 
+  # Initialize random number generator
+  srand(id)
+
   # Show trajectory for debugging
   show_colored_trajectory()
 }
