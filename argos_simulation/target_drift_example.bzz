@@ -23,12 +23,7 @@ function init() {
   s.join()
 }
 
-# Executed every time step
-function step() {  
-  # Change speed
-  set_velocity(gauss(speed_mean, TARGET_SPEED_STDEV), 
-               gauss(speed_mean, TARGET_SPEED_STDEV))
-
+function is_discovered() { 
   # Look if a drone discovered the target
   drones_in_sensing_range = neighbors.nonkin().filter(
       function(rid, data) { 
@@ -41,6 +36,16 @@ function step() {
     debug.set_color(0,255,0)
     debug.print("Discovered!")
   }
+}
+
+# Executed every time step
+function step() {  
+  # Change speed
+  set_velocity(gauss(speed_mean, TARGET_SPEED_STDEV), 
+               gauss(speed_mean, TARGET_SPEED_STDEV))
+
+  # Check if discovered
+  is_discovered()
 }
  
 # Execute at exit

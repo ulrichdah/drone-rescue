@@ -6,5 +6,5 @@ function show_colored_trajectory( nr_robots ) {
     var g = int(math.abs(float_id - (float_nr_robots/3))/(float_nr_robots/3) * 200)
     var b = int(200 - float_id*(200/float_nr_robots))
     # Show trajectory for debugging
-    debug.trajectory.enable(10000, r, g, b)
+    debug.trajectory.enable(5, r, g, b)
 }

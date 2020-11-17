@@ -1,1 +1,12 @@
 # Global variables
+var current_search_step = 0
+var next_position = { .x = 0.0, .y = 0.0 }
+var current_state = STATE_SEARCH
+var found_target_info = { .found = 0, .another_robot_found = -1, .x = 0.0, .y = 0.0 }
+var number_of_targets_in_sight = 0
+
+# State machine
+STATE_SEARCH = 0
+STATE_FOUND = 1
+STATE_MEETING = 2
+STATE_RELAY = 3

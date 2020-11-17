@@ -15,19 +15,112 @@ function init() {
   # Target swarm
   s = swarm.create(2)
   s.join()
-}
- 
-# Executed every time step
-function step() {
-  
-  goto(0.0,0.0,2.0)
 
-  # Look if a target is detected
+  # Set first search position
+  next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+  next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+  goto(next_position.x, next_position.y)
+
+  # Set initial state
+  current_state = STATE_SEARCH
+}
+
+# Check if a target is in sight
+function has_discovered_target()
+{ 
   targets_in_sensing_range = neighbors.nonkin().filter(
       function(rid, data) { 
         return data.distance < (100 * SENSING_RANGE) # ARGoS simulation is in centimeters
       }
     )
+  return targets_in_sensing_range.count()
+}
+
+# Continue random search
+function random_search_next_position()
+{ 
+  next_position.x = uniform(next_position.x, SEARCH_SPEED)
+  next_position.y = uniform(next_position.y, SEARCH_SPEED)
+  goto(next_position.x, next_position.y)
+}
+
+# Listen to others
+function listen_for_found_targets(){
+    neighbors.listen("found_target_info",
+                  function(vid, value, rid)  {
+                      if (value.found == 1) { 
+                        found_target_info.another_robot_found = rid
+                        found_target_info.x = value.x
+                        found_target_info.y = value.y
+                      }
+                    }
+                    )
+}
+
+# Executed every time step
+function step() {
+
+  listen_for_found_targets()
+
+  ### State machine ###
+
+  ## Searching for the target
+  if (current_state == STATE_SEARCH){ 
+    debug.print("Searching")
+    # Look if a target is discovered
+    if ( has_discovered_target() != 0 ) { 
+      found_target_info.found = 1
+      found_target_info.x = next_position.x
+      found_target_info.y = next_position.y
+      neighbors.kin().broadcast("found_target_info", found_target_info)
+      goto(MEETING_POINT.x, MEETING_POINT.y)
+      current_state = STATE_FOUND
+      current_search_step = 0      
+    } 
+    # If the max number of search step is reached go back to meeting point
+    else if ( current_search_step >= NUMBER_OF_SEARCH_STEP ){ 
+      goto(MEETING_POINT.x, MEETING_POINT.y)
+      current_state = STATE_MEETING
+      current_search_step = 0
+    }
+    # Else continue searching
+    else { 
+      random_search_next_position()
+      current_search_step = current_search_step + 1
+    }
+
+  }
+  # The robot that found the target stays at the meeting point and broacast its info
+  else if ( current_state == STATE_FOUND ){ 
+    debug.print("Found the target")
+    neighbors.kin().broadcast("found_target_info", found_target_info)
+  }
+  # At some point the other robots go the meeting point and see if another robot found something
+  else if ( current_state == STATE_MEETING ){ 
+    debug.print("Periodic meeting")
+    # If another robot found a target, go in relay position
+    if (found_target_info.another_robot_found != -1)
+    {
+      relay_id = id
+      if (relay_id < found_target_info.another_robot_found){
+        relay_id = relay_id + 1
+      }
+      relay_ratio = float(relay_id) / float(NUMBER_OF_ROBOTS-1)
+      relay_x = (found_target_info.x - MEETING_POINT.x ) * relay_ratio + MEETING_POINT.x
+      relay_y = (found_target_info.y - MEETING_POINT.y ) * relay_ratio + MEETING_POINT.y
+      goto(relay_x, relay_y)
+      current_state = STATE_RELAY
+      debug.print("Communication relay")
+    }
+    # Else continue searching
+    else
+    {
+      next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+      next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+      goto(next_position.x, next_position.y)
+      current_state = STATE_SEARCH
+    }
+  }
 
 }
  
