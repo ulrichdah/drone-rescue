@@ -39,8 +39,8 @@ function has_discovered_target()
 # Continue random search
 function random_search_next_position()
 { 
-  next_position.x = uniform(next_position.x, SEARCH_SPEED)
-  next_position.y = uniform(next_position.y, SEARCH_SPEED)
+  next_position.x = uniform(next_position.x-SEARCH_SPEED, next_position.x+SEARCH_SPEED)
+  next_position.y = uniform(next_position.y-SEARCH_SPEED, next_position.y+SEARCH_SPEED)
   goto(next_position.x, next_position.y)
 }
 
@@ -85,8 +85,11 @@ function step() {
     }
     # Else continue searching
     else { 
-      random_search_next_position()
-      current_search_step = current_search_step + 1
+      if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
+      {
+        random_search_next_position()
+        current_search_step = current_search_step + 1
+      }
     }
 
   }
@@ -98,8 +101,9 @@ function step() {
   # At some point the other robots go the meeting point and see if another robot found something
   else if ( current_state == STATE_MEETING ){ 
     debug.print("Periodic meeting")
+    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {}
     # If another robot found a target, go in relay position
-    if (found_target_info.another_robot_found != -1)
+    else if (found_target_info.another_robot_found != -1)
     {
       relay_id = id
       if (relay_id < found_target_info.another_robot_found){
