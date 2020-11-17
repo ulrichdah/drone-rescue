@@ -51,36 +51,19 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="20, 26, 4" center="0,0,2">
-
-    <!-- * Walls * -->
-    <box id="wall_e" size="20, .1, 4" movable="false">
-      <body position="0, 13, 0" orientation="0, 0, 0" />
+  <arena size="20, 25, 4" center="0,0,2">
+    <box id="division" size="20, .1, 0.5" movable="false">
+      <body position="0, -7.5, 0" orientation="0, 0, 0" />
       <leds medium="leds">
         <led offset="0, -.1, 2.1" anchor="origin" color="red" />
       </leds>
     </box>
 
-    <box id="wall_w" size="20, .1, 4" movable="false">
-      <body position="0, -13, 0" orientation="0, 0, 0" />
-      <leds medium="leds">
-        <led offset="0, .1, 2.1" anchor="origin" color="blue" />
-      </leds>
-    </box>
-
-    <box id="wall_n" size=".1, 26, 4" movable="false">
-      <body position="10, 0, 0" orientation="0, 0, 0" />
-    </box>
-
-    <box id="wall_s" size=".1, 26, 4" movable="false">
-      <body position="-10, 0, 0" orientation="0, 0, 0" />
-    </box>
-
     <!-- * Initial targets positions * -->
     <distribute>
-      <position method="uniform" min="-8,-8,0" max="8,8,0" />
+      <position method="uniform" min="-10,-5,0" max="10,15,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="5" max_trials="100">
+      <entity quantity="2" max_trials="100">
         <foot-bot id="fb">
           <controller config="target_controller"/>
         </foot-bot>
@@ -89,9 +72,9 @@
 
     <!-- * Initial drones positions * -->
     <distribute>
-      <position method="uniform" min="-8,-8,0" max="8,8,0" />
+      <position method="uniform" min="-10,-12.5,0" max="10,-7.5,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="5" max_trials="100">
+      <entity quantity="3" max_trials="100">
         <spiri id="sp" rab_range="1000000" rab_data_size="100000" camera_range="5">
           <controller config="drone_controller" />
         </spiri>
@@ -122,7 +105,7 @@
   <visualization>
     <qt-opengl>
       <camera>
-        <placement idx="0" position="0,0,15.3" look_at="0,0,0" up="-1,0,0" lens_focal_length="20" />
+        <placement idx="0" position="0,0,15" look_at="0,0,0" up="-1,0,0" lens_focal_length="20" />
       </camera>
        <frame_grabbing directory="log/"
                        base_name="frame_" 

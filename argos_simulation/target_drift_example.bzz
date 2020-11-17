@@ -2,20 +2,31 @@ include "buzz_includes/buzz_utils/vec2.bzz"
 include "buzz_includes/buzz_utils/string.bzz"
 include "config/search_example/parameters.bzz"
 
+var speed_mean
+
 # Executed at init time
 function init() {
   # Set initial velocity
-  set_velocity(uniform(0.0, TARGET_SPEED_MAX_X),uniform(0.0, TARGET_SPEED_MAX_Y))
+  speed_mean = 0.0
+  while (math.abs(speed_mean) < TARGET_SPEED_MAX/2)
+  {
+    speed_mean = uniform(-TARGET_SPEED_MAX, TARGET_SPEED_MAX)
+  }
+  set_velocity(speed_mean, speed_mean)
 
-  # Set initial color
+  # Set initial state
   set_led(255,0,0)
+  debug.set_color(255,0,0)
 }
  
 # Executed every time step
 function step() {  
-  # Change slightly direction
+  # Change speed
+  set_velocity(gauss(speed_mean, TARGET_SPEED_STDEV), 
+               gauss(speed_mean, TARGET_SPEED_STDEV))
 
   # Change color
+
 }
  
 # Execute at exit
