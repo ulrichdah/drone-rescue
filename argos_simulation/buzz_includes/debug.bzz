@@ -1,6 +1,5 @@
-function show_colored_trajectory() {
+function show_colored_trajectory( nr_robots ) {
     # Compute colors
-    var nr_robots = NUMBER_OF_ROBOTS
     var float_id = float(id)
     var r = int((float_id/(nr_robots/2)) * 200)
     var g = int(math.abs(float_id - (nr_robots/2))/(nr_robots/2) * 200)

@@ -1,2 +1,14 @@
-# Parameters
+# Search space parameters
+
+
+# Searching drones parameters
 NUMBER_OF_ROBOTS = 5
+
+# Targets parameters
+NUMBER_OF_TARGETS = 2
+TARGET_SPEED_MAX_X = 10.0
+TARGET_SPEED_STDEV_X = 2.0
+TARGET_SPEED_MAX_Y = 10.0
+TARGET_SPEED_STDEV_Y = 2.0
+
+

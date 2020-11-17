@@ -28,10 +28,10 @@
         <range_and_bearing implementation="medium" medium="rab" show_rays="false" noise_std_dev="0" />
       </sensors>
       <params bytecode_file="/home/docker/simulation/argos_simulation/target_drift_example.bo"
-              debug_file="/home/docker/simulation/argos_simulation/target_drift_example.bdb" />
+              debug_file="/home/docker/simulation/argos_simulation/search_example.bdb" />
     </buzz_controller_target_sim>
 
-    <!--buzz_controller_drone_rescue_sim id="drone_controller">
+    <buzz_controller_drone_rescue_sim id="drone_controller">
       <actuators>
         <quadrotor_position implementation="default" />
         <range_and_bearing  implementation="default" />
@@ -43,7 +43,7 @@
       </sensors>
       <params bytecode_file="/home/docker/simulation/argos_simulation/search_example.bo"
               debug_file="/home/docker/simulation/argos_simulation/search_example.bdb" />
-    </buzz_controller_drone_rescue_sim-->
+    </buzz_controller_drone_rescue_sim>
 
 
   </controllers>
@@ -88,7 +88,7 @@
     </distribute>
 
     <!-- * Initial drones positions * -->
-    <!--distribute>
+    <distribute>
       <position method="uniform" min="-8,-8,0" max="8,8,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
       <entity quantity="5" max_trials="100">
@@ -96,7 +96,7 @@
           <controller config="drone_controller" />
         </spiri>
       </entity>
-    </distribute-->
+    </distribute>
 
   </arena>
 
@@ -124,10 +124,10 @@
       <camera>
         <placement idx="0" position="0,0,15.3" look_at="0,0,0" up="-1,0,0" lens_focal_length="20" />
       </camera>
-       <!--frame_grabbing directory="log/"
+       <frame_grabbing directory="log/"
                        base_name="frame_" 
                        format="png"
-                       quality="100" /--> 
+                       quality="100" /> 
       <user_functions label="buzz_qt" />
     </qt-opengl>
   </visualization>

@@ -1,19 +1,21 @@
 include "buzz_includes/buzz_utils/vec2.bzz"
 include "buzz_includes/buzz_utils/string.bzz"
+include "config/search_example/parameters.bzz"
 
 # Executed at init time
 function init() {
-  # Initialize random number generator
-  srand(id)
-
   # Set initial velocity
+  set_velocity(uniform(0.0, TARGET_SPEED_MAX_X),uniform(0.0, TARGET_SPEED_MAX_Y))
+
+  # Set initial color
+  set_led(255,0,0)
 }
  
 # Executed every time step
 function step() {  
   # Change slightly direction
-  set_velocity(1.0,1.0)
 
+  # Change color
 }
  
 # Execute at exit

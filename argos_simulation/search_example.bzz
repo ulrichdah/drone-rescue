@@ -9,20 +9,17 @@ function init() {
   # Take off command for the Spiri drone model
   takeoff()
 
-  # Initialize random number generator
-  srand(id)
-
   # Show trajectory for debugging
-  show_colored_trajectory()
+  show_colored_trajectory(NUMBER_OF_ROBOTS)
 }
  
 # Executed every time step
 function step() {
   
+  uniform(1.0, 2.0)
+
   # Increment number of steps
   current_step_ = current_step_ + 1
-
-  goto(1,1,1)
 }
  
 # Execute at exit
