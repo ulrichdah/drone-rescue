@@ -17,16 +17,30 @@ function init() {
   # Set initial state
   set_led(255,0,0)
   debug.set_color(255,0,0)
+
+  # Target swarm
+  s = swarm.create(1)
+  s.join()
 }
- 
+
 # Executed every time step
 function step() {  
   # Change speed
   set_velocity(gauss(speed_mean, TARGET_SPEED_STDEV), 
                gauss(speed_mean, TARGET_SPEED_STDEV))
 
-  # Change color
-
+  # Look if a drone discovered the target
+  drones_in_sensing_range = neighbors.nonkin().filter(
+      function(rid, data) { 
+        return data.distance < (100 * SENSING_RANGE) # ARGoS simulation is in centimeters
+      }
+    )
+  if (drones_in_sensing_range.count() != 0) 
+  { 
+    set_led(0,255,0)
+    debug.set_color(0,255,0)
+    debug.print("Discovered!")
+  }
 }
  
 # Execute at exit

@@ -3,6 +3,7 @@
 
 # Searching drones parameters
 NUMBER_OF_ROBOTS = 3
+SENSING_RANGE = 2
 
 # Targets parameters
 NUMBER_OF_TARGETS = 2

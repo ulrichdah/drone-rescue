@@ -2,8 +2,8 @@ function show_colored_trajectory( nr_robots ) {
     # Compute colors
     var float_nr_robots = float(nr_robots)
     var float_id = float(id)
-    var r = int((float_id/(float_nr_robots/2)) * 200)
-    var g = int(math.abs(float_id - (float_nr_robots/2))/(float_nr_robots/2) * 200)
+    var r = int((float_id/(float_nr_robots/3)) * 200)
+    var g = int(math.abs(float_id - (float_nr_robots/3))/(float_nr_robots/3) * 200)
     var b = int(200 - float_id*(200/float_nr_robots))
     # Show trajectory for debugging
     debug.trajectory.enable(10000, r, g, b)

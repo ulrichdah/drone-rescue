@@ -61,10 +61,10 @@
 
     <!-- * Initial targets positions * -->
     <distribute>
-      <position method="uniform" min="-10,-5,0" max="10,15,0" />
+      <position method="uniform" min="-10,-7.5,0" max="10,12.5,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
       <entity quantity="2" max_trials="100">
-        <foot-bot id="fb">
+        <foot-bot id="fb" rab_range="1000000">
           <controller config="target_controller"/>
         </foot-bot>
       </entity>

@@ -11,13 +11,23 @@ function init() {
 
   # Show trajectory for debugging
   show_colored_trajectory(NUMBER_OF_ROBOTS)
-  
+
+  # Target swarm
+  s = swarm.create(2)
+  s.join()
 }
  
 # Executed every time step
 function step() {
   
   goto(0.0,0.0,2.0)
+
+  # Look if a target is detected
+  targets_in_sensing_range = neighbors.nonkin().filter(
+      function(rid, data) { 
+        return data.distance < (100 * SENSING_RANGE) # ARGoS simulation is in centimeters
+      }
+    )
 
 }
  
