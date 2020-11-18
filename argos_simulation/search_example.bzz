@@ -24,11 +24,6 @@ function init() {
 # Check if a target is in sight
 function has_discovered_target()
 { 
-  number_of_targets = detect_targets()
-  if (number_of_targets != 0)
-  {
-    log("n targets= ", number_of_targets)
-  }
   return detect_targets()
 }
 
@@ -56,8 +51,9 @@ function listen_for_found_targets(){
 # Executed every time step
 function step() {
 
+  # Update sensors and communication data
   listen_for_found_targets()
-  has_discovered_target()
+  update_gps_position()
 
   ### State machine ###
   
@@ -67,8 +63,8 @@ function step() {
     # Look if a target is discovered
     if ( has_discovered_target() != 0 ) { 
       found_target_info.found = 1
-      found_target_info.x = next_position.x
-      found_target_info.y = next_position.y
+      found_target_info.x = gps_position.x
+      found_target_info.y = gps_position.y
       neighbors.broadcast("found_target_info", found_target_info)
       goto(MEETING_POINT.x, MEETING_POINT.y)
       current_state = STATE_FOUND
@@ -98,7 +94,18 @@ function step() {
   # At some point the other robots go the meeting point and see if another robot found something
   else if ( current_state == STATE_MEETING ){ 
     debug.print("Periodic meeting")
-    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {}
+    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
+      # Look for targets when comming back to meeting point
+      if ( has_discovered_target() != 0 ) { 
+        found_target_info.found = 1
+        found_target_info.x = gps_position.x
+        found_target_info.y = gps_position.y
+        neighbors.broadcast("found_target_info", found_target_info)
+        goto(MEETING_POINT.x, MEETING_POINT.y)
+        current_state = STATE_FOUND
+        current_search_step = 0      
+      } 
+    }
     # If another robot found a target, go in relay position
     else if (found_target_info.another_robot_found != -1)
     {
