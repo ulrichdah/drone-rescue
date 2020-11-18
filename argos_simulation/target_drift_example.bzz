@@ -13,6 +13,7 @@ function init() {
     speed_mean = uniform(-TARGET_SPEED_MAX, TARGET_SPEED_MAX)
   }
   set_velocity(speed_mean, speed_mean)
+  set_led(0,0,255)
 }
 
 # Executed every time step
