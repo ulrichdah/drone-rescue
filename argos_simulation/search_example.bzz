@@ -12,10 +12,6 @@ function init() {
   # Show trajectory for debugging
   show_colored_trajectory(NUMBER_OF_ROBOTS)
 
-  # Target swarm
-  s = swarm.create(2)
-  s.join()
-
   # Set first search position
   next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
   next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
@@ -28,12 +24,8 @@ function init() {
 # Check if a target is in sight
 function has_discovered_target()
 { 
-  targets_in_sensing_range = neighbors.nonkin().filter(
-      function(rid, data) { 
-        return data.distance < (100 * SENSING_RANGE) # ARGoS simulation is in centimeters
-      }
-    )
-  return targets_in_sensing_range.count()
+  log("n targets= ", detect_targets())
+  return detect_targets()
 }
 
 # Continue random search
@@ -63,7 +55,7 @@ function step() {
   listen_for_found_targets()
 
   ### State machine ###
-
+has_discovered_target()
   ## Searching for the target
   if (current_state == STATE_SEARCH){ 
     debug.print("Searching")
@@ -72,7 +64,7 @@ function step() {
       found_target_info.found = 1
       found_target_info.x = next_position.x
       found_target_info.y = next_position.y
-      neighbors.kin().broadcast("found_target_info", found_target_info)
+      neighbors.broadcast("found_target_info", found_target_info)
       goto(MEETING_POINT.x, MEETING_POINT.y)
       current_state = STATE_FOUND
       current_search_step = 0      
@@ -96,7 +88,7 @@ function step() {
   # The robot that found the target stays at the meeting point and broacast its info
   else if ( current_state == STATE_FOUND ){ 
     debug.print("Found the target")
-    neighbors.kin().broadcast("found_target_info", found_target_info)
+    neighbors.broadcast("found_target_info", found_target_info)
   }
   # At some point the other robots go the meeting point and see if another robot found something
   else if ( current_state == STATE_MEETING ){ 
