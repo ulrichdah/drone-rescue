@@ -51,7 +51,7 @@
   <!-- *********************** -->
   <!-- * Arena configuration * -->
   <!-- *********************** -->
-  <arena size="25, 30, 4" center="0,0,2"> 
+  <arena size="50, 50, 4" center="0,0,2"> 
   <!-- The effective area, where the robots are allowed is 20x25 -->
     <box id="division" size="25, .1, 0.1" movable="false">
       <body position="0, -7.5, 0" orientation="0, 0, 0" />
@@ -59,6 +59,13 @@
         <led offset="0, -.1, 2.1" anchor="origin" color="red" />
       </leds>
     </box>
+
+    <light id="light_1a"
+           position="0,0, 0.3"
+           orientation="0,0,0"
+           color="red"
+           intensity="30.0"
+           medium="leds" />
 
     <!-- * Initial targets positions * -->
     <distribute>
@@ -76,7 +83,7 @@
       <position method="uniform" min="-10,-12.5,0" max="10,-7.5,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
       <entity quantity="3" max_trials="100">
-        <spiri id="sp" rab_range="1000000" rab_data_size="100000" camera_range="5">
+        <spiri id="sp" rab_range="1000000" rab_data_size="100000" colored_blob_perspective_camera_aperture="180">
           <controller config="drone_controller" />
         </spiri>
       </entity>

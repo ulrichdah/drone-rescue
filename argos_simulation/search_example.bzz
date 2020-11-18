@@ -24,7 +24,11 @@ function init() {
 # Check if a target is in sight
 function has_discovered_target()
 { 
-  log("n targets= ", detect_targets())
+  number_of_targets = detect_targets()
+  if (number_of_targets != 0)
+  {
+    log("n targets= ", number_of_targets)
+  }
   return detect_targets()
 }
 
@@ -53,9 +57,10 @@ function listen_for_found_targets(){
 function step() {
 
   listen_for_found_targets()
+  has_discovered_target()
 
   ### State machine ###
-has_discovered_target()
+  
   ## Searching for the target
   if (current_state == STATE_SEARCH){ 
     debug.print("Searching")
