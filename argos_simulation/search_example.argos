@@ -57,18 +57,6 @@
       <body position="0, -10, 0" orientation="0, 0, 0" />
     </box>
 
-    <box id="divifsion" size="20, .1, 0.1" movable="false">
-      <body position="0, 0, 0" orientation="0, 0, 0" />
-    </box>
-
-    <box id="divisaion" size="0.1, 20, 0.1" movable="false">
-      <body position="0, 0, 0" orientation="0, 0, 0" />
-    </box>
-
-    <box id="divisdsion" size="0.1, 2, 0.1" movable="false">
-      <body position="5, -11, 0" orientation="0, 0, 0" />
-    </box>
-
     <!-- * Initial targets positions * -->
     <distribute>
       <position method="uniform" min="-10,-10,0" max="10,10,0" />
