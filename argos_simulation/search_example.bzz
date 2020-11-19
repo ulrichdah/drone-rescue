@@ -43,8 +43,8 @@ function has_discovered_target()
 # Continue random search
 function random_search()
 { 
-  next_position.x = uniform(next_position.x-SEARCH_SPEED, next_position.x+SEARCH_SPEED)
-  next_position.y = uniform(next_position.y-SEARCH_SPEED, next_position.y+SEARCH_SPEED)
+  next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+  next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
   goto(next_position.x, next_position.y)
 }
 
@@ -53,8 +53,7 @@ function step() {
   # Update sensors
   update_gps_position()
 
-  ### State machine ###
-  
+  ### State machine ###  
   ## Searching for the target
   if (current_state == STATE_SEARCH){ 
     debug.print("Searching")

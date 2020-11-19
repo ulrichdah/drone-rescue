@@ -1,17 +1,15 @@
 # Search space parameters
-SEARCH_SPACE = { .minx = -10.0, .miny = -7.5, .maxx = 10.0, .maxy = 12.5}
-MEETING_POINT = { .x = 0.0, .y = -7.5}
+SEARCH_SPACE = { .minx = -10.0, .miny = -10.0, .maxx = 10.0, .maxy = 10.0}
+MEETING_POINT = { .x = 0.0, .y = -10.0}
 
 # Searching drones parameters
 NUMBER_OF_ROBOTS = 3
-SENSING_RANGE = 1000
-SEARCH_SPEED = 1
-NUMBER_OF_SEARCH_STEP = 10
-DELTA_REACHED_POS = 0.5
+SEARCH_SPEED = 1.0
+NUMBER_OF_SEARCH_STEP = 20
+DELTA_REACHED_POS = 1.0
 
 # Targets parameters
-NUMBER_OF_TARGETS = 2
-TARGET_SPEED_MAX = 20.0
-TARGET_SPEED_STDEV = 2.0
+TARGET_SPEED_MAX = 2.0
+TARGET_SPEED_STDEV = 0.5
 
 
