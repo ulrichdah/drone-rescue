@@ -25,32 +25,21 @@ RUN apt-get update && apt-get install -y \
     libfreeimageplus-dev \
     liblua5.2-dev \
     lua5.2 \
+    liblua5.3-dev \
+    lua5.3 \
+    libboost-filesystem-dev \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
     
-COPY argos3_simulator-3.0.0-x86_64-beta56.deb .
-
-RUN apt-get update && \ 
-    apt-get install -y liblua5.3-dev lua5.3 libboost-filesystem-dev cmake
-
 RUN apt-get update && \
     apt-get -y install sudo
 RUN adduser --disabled-password --gecos '' docker
 RUN adduser docker sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER docker
-RUN sudo dpkg -i argos3_simulator-3.0.0-x86_64-beta56.deb
+#RUN sudo dpkg -i argos3_simulator-3.0.0-x86_64-beta56.deb
 RUN sudo chmod -R ugo+rw /home/docker
 USER root
-
-# Install Buzz
-RUN git clone https://github.com/MISTLab/Buzz.git /home/docker/buzz
-RUN cd /home/docker/buzz &&\
-    mkdir build &&\
-    cd build &&\
-    cmake -DCMAKE_BUILD_TYPE=Debug ../src &&\
-    make &&\
-    make install &&\
-    ldconfig
 
 # Install and setup some editing and debugging tools
 RUN sudo apt-get install -y gedit nano strace valgrind
@@ -74,8 +63,48 @@ RUN touch /root/.ssh/known_hosts && \
   ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \nIdentityFile ~/.ssh/argos_id_rsa \n\n Host github-controller \nHostName github.com \nUser git \nIdentityFile ~/.ssh/controller_id_rsa" >> ~/.ssh/config
 
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+RUN apt-get update && apt-get install -y \
+    graphviz \
+    graphviz-dev \
+    asciidoc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Argos
+RUN cd /home/docker/ &&\
+    git clone https://github.com/lajoiepy/argos3.git &&\
+    cd argos3 &&\
+    git checkout spiri_downward_facing_camera &&\
+    mkdir build_simulator &&\
+    cd build_simulator &&\
+    cmake ../src -DCMAKE_BUILD_TYPE=Debug \
+     -DARGOS_BUILD_FOR=simulator \
+     -DARGOS_THREADSAFE_LOG=ON \
+     -DARGOS_DYNAMIC_LOADING=ON &&\
+    make
+
+RUN touch /home/docker/argos3/build_simulator/argos3.1.gz &&\
+    touch /home/docker/argos3/build_simulator/README.html &&\
+    cd /home/docker/argos3/build_simulator &&\
+    make install
+
+RUN chmod +x /home/docker/argos3/build_simulator/argos_post_install.sh &&\
+    ./home/docker/argos3/build_simulator/argos_post_install.sh &&\
+    echo "\nsource /home/docker/argos3/build_simulator/setup_env.sh\n" >> /.bashrc
+
+
 # Add dummy argument to force rebuild starting from that point
 ARG CODE_UPDATE=unknown
+
+# Install Buzz
+RUN git clone https://github.com/lajoiepy/Buzz.git /home/docker/buzz
+RUN cd /home/docker/buzz &&\
+    mkdir build &&\
+    cd build &&\
+    cmake -DCMAKE_BUILD_TYPE=Debug ../src &&\
+    make &&\
+    make install &&\
+    ldconfig
 
 # Clone simulation
 RUN cd /home/docker/ &&\
@@ -85,7 +114,7 @@ RUN cd /home/docker/ &&\
 
 # Setup debug config for visual studio code
 RUN mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\
-    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
+    echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/local/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
     > /home/docker/simulation/.vscode/launch.json
 
 # Compile C++ controller
@@ -98,7 +127,8 @@ RUN cd /home/docker/simulation/controller &&\
 
 # Compile buzz script
 RUN cd /home/docker/simulation/argos_simulation &&\
-    bzzc search_example.bzz
+    bzzc search_example.bzz &&\
+    bzzc target_drift_example.bzz
 
 # Put your own git credentials to commit edited code
 RUN git config --global user.email "lajoie.py@gmail.com" &&\
