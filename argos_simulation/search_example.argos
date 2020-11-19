@@ -53,7 +53,7 @@
   <!-- *********************** -->
   <arena size="50, 50, 4" center="0,0,2"> 
     <!-- The effective area, where the robots are allowed is 20x20 -->
-    <box id="division" size="50, .1, 0.1" movable="false">
+    <box id="division" size="50, .2, 0.1" movable="false" color="blue">
       <body position="0, -10, 0" orientation="0, 0, 0" />
     </box>
 
