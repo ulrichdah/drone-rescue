@@ -5,11 +5,11 @@ You need to download the ARGoS simulator from https://www.argos-sim.info/core.ph
 
 For the first build execute: 
 ```
-docker build . --tag drone-rescue-simulation --network host
+docker build . --tag drones-search-and-rescue --network host
 ```
 If you modified the code from this repository or its dependencies (https://github.com/lajoiepy/Buzz) and you want to use the latest version, use the following command: 
 ```
-docker build . --tag drone-rescue-simulation --network host --build-arg CODE_UPDATE=<dummy-arg>
+docker build . --tag drones-search-and-rescue --network host --build-arg CODE_UPDATE=<dummy-arg>
 ```
 Be sure to change the `CODE_UPDATE` value every time to invalidate your build cache. If you modified the ARGoS simulator itself use the arg `CODE_UPDATE_ARGOS` instead.
 
