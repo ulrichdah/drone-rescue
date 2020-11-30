@@ -14,9 +14,14 @@ docker build . --tag drone-rescue-simulation --network host --build-arg CODE_UPD
 Be sure to change the `CODE_UPDATE` value every time to invalidate your build cache. If you modified the ARGoS simulator itself use the arg `CODE_UPDATE_ARGOS` instead.
 
 # To run a container
-Use the following command while specifying a folder on your host machine to store the log files from the simulation. 
+The ARGoS simulation needs access to a graphical user interface to work. Many options are available to have access to the GUI of the apps running in your docker container. I propose using https://github.com/mviereck/x11docker, but feel free to use another one. 
+You can install `x11docker` with the following command:
 ```
-sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/simulation/argos_simulation/log -- drone-rescue-simulation:latest
+curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker | sudo bash -s -- --update
+```
+If you installed `x11docker`, use the following command while specifying a folder on your host machine to store the log files from the simulation.
+```
+sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/simulation/argos_simulation/log -- lajoiepy/drones-search-and-rescue:latest
 ```
 
 # Launching the simulation

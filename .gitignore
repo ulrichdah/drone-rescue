@@ -1,10 +1,7 @@
-buzz/build
-
 *.bo
 *.bdb
 *bzz.*
 *.vscode/
-argos_simulation/log/fixed_datasets
-argos_simulation/profile.txt
-*.png
+argos_simulation/log/*
+!argos_simulation/log/.dummy
 *.deb
