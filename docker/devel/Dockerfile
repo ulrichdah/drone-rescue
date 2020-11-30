@@ -70,6 +70,9 @@ RUN apt-get update && apt-get install -y \
     asciidoc \
     && rm -rf /var/lib/apt/lists/*
 
+# Add dummy argument to force rebuild starting from that point
+ARG CODE_UPDATE_ARGOS=unknown
+
 # Install Argos
 RUN cd /home/docker/ &&\
     git clone https://github.com/lajoiepy/argos3.git &&\
@@ -131,8 +134,8 @@ RUN cd /home/docker/simulation/argos_simulation &&\
     bzzc target_drift_example.bzz
 
 # Put your own git credentials to commit edited code
-RUN git config --global user.email "lajoie.py@gmail.com" &&\
-    git config --global user.name "Pierre-Yves Lajoie"
+#RUN git config --global user.email "lajoie.py@gmail.com" &&\
+#    git config --global user.name "Pierre-Yves Lajoie"
 
 # Entry point to start the simulation
 WORKDIR /home/docker/simulation/argos_simulation
