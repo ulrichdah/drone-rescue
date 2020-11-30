@@ -58,10 +58,9 @@ RUN touch /home/docker/code/User/settings.json &&\
 # Setup deployment key
 RUN mkdir /root/.ssh/
 ADD argos-key /root/.ssh/argos_id_rsa
-ADD controller-key /root/.ssh/controller_id_rsa
 RUN touch /root/.ssh/known_hosts && \ 
   ssh-keyscan github.com >> /root/.ssh/known_hosts
-RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \nIdentityFile ~/.ssh/argos_id_rsa \n\n Host github-controller \nHostName github.com \nUser git \nIdentityFile ~/.ssh/controller_id_rsa" >> ~/.ssh/config
+RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \nIdentityFile ~/.ssh/argos_id_rsa" >> ~/.ssh/config
 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get update && apt-get install -y \
@@ -111,9 +110,7 @@ RUN cd /home/docker/buzz &&\
 
 # Clone simulation
 RUN cd /home/docker/ &&\
-    git clone github-argos:lajoiepy/drone-rescue-simulation.git simulation &&\
-    cd simulation &&\
-    git submodule update --init --recursive
+    git clone github-argos:lajoiepy/drone-rescue-simulation.git simulation
 
 # Setup debug config for visual studio code
 RUN mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\

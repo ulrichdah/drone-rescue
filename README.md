@@ -7,14 +7,6 @@ To pull the docker image:
 ```
 docker pull lajoiepy/drones-search-and-rescue
 ```
-
-## Access to the submodule on your local machine
-If you want to clone the controller submodule on your local machine you will need to change the submodule info.
-
-In `.gitmodules` and in the remotes change `github-controller` for your GitHub user ID. 
-
-This is needed because the repositories are currently private.
-
 ## Robots + Sensing
 The flying robots in the simulation are the Spiri model in ARGoS (https://github.com/lajoiepy/argos3/tree/master/src/plugins/robots/spiri) and the target is the foot-bot (https://github.com/lajoiepy/argos3/tree/master/src/plugins/robots/foot-bot). You can modify their attributes in their respective source files. You will need to rebuild and install ARGoS to see the effects.
 
