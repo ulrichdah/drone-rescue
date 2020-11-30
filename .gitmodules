@@ -1,3 +1,0 @@
-[submodule "controller"]
-	path = controller
-	url = github-controller:lajoiepy/drone_rescue_controller.git
