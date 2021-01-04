@@ -3,12 +3,13 @@
 namespace argos {
 void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
    /* Create the box */
-   CBoxEntity* b = new CBoxEntity("box",                 // the id
-                                 CVector3(1,1,1),       // the position of the base center in m
-                                 CQuaternion(),         // the orientation
-                                 true,                  // this box is movable
-                                 CVector3(0.1,0.1,0.1), // the size of the box in m
-                                 1);                    // the mass in kg
+   CBoxEntity* b = new CBoxEntity("box",                    // the id
+                                 CVector3(0.5,0.5,0.0),     // the position of the base center in m
+                                 CQuaternion(),             // the orientation
+                                 false,                     // this box is movable
+                                 CVector3(100.0,100.0,0.01),// the size of the box in m
+                                 1);                        // the mass in kg
+   b->SetColor(CVector3(0.0f,0.5f,0.1f));
    /* Add the box to the space */
    AddEntity(*b);
 }
