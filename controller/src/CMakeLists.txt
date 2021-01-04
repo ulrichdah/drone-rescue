@@ -39,7 +39,9 @@ set(ARGOS_BUZZ_SOURCES
   argos/target/buzz_controller_target_sim.cpp     
   argos/target/buzz_closures_target_sim.cpp
   argos/map/map_loop_functions.h      
-  argos/map/map_loop_functions.cpp  )
+  argos/map/map_loop_functions.cpp
+  argos/map/belief_map.h      
+  argos/map/belief_map.cpp  )
 
 add_library(argos3plugin_buzz_simulator_drone_rescue SHARED ${ARGOS_BUZZ_SOURCES})
 target_link_libraries(argos3plugin_buzz_simulator_drone_rescue
