@@ -6,13 +6,6 @@
 namespace argos {
 
 void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
-   // Create fake belief map
-   std::vector<std::pair<int, int>> robots_position;
-   robots_position.push_back(std::make_pair(0,0));
-   robots_position.push_back(std::make_pair(7,7));
-   robots_position.push_back(std::make_pair(-7,-7));
-   BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30);
-
    // Indicate grass area
    CBoxEntity* grass = new CBoxEntity("grass",                    // the id
                                  CVector3(0.0,-12.0,0.0),     // the position of the base center in m
@@ -25,8 +18,8 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
    
    // Draw belief map
    BeliefMap belief_map("/home/docker/simulation/sample_maps/fake0.txt");
-   float world_offset_x = - belief_map.GetSizeX()/2 + 0.5;
-   float world_offset_y = - belief_map.GetSizeY()/2 + 0.5;
+   float world_offset_x = - belief_map.GetSizeX()/2 - 0.5;
+   float world_offset_y = - belief_map.GetSizeY()/2 - 0.5;
    for (int i = 0; i < belief_map.GetSizeX(); i++)
    {
       for (int j = 0; j < belief_map.GetSizeY(); j++)
@@ -49,7 +42,6 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
 
 void MapLoopFunctions::AddBeliefBox(const CVector3& position, const CVector3& color){
    // Create the grass space
-   std::cout << position.GetX() << " " << position.GetY() << " " << position.GetZ() << std::endl;
    CBoxEntity* box = new CBoxEntity("c" + std::to_string((int)(position.GetX())) + "_" + std::to_string((int)(position.GetY())) + "_" + std::to_string((int)(rand()*1000)),  // the id
                                  CVector3(position.GetX(),position.GetY(),position.GetZ()),     // the position of the base center in m
                                  CQuaternion(),             // the orientation

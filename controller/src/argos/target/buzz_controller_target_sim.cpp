@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <stdio.h>
-
+#include "../map/belief_map.h"
 namespace buzz_drone_rescue_sim {
 
 
@@ -30,6 +30,11 @@ CBuzzControllerTargetSim::~CBuzzControllerTargetSim() {
 
 void CBuzzControllerTargetSim::Init(TConfigurationNode& t_node)  {
    CBuzzControllerFootBot::Init(t_node);
+   // Create fake belief map
+   CVector3 position = m_pcPos->GetReading().Position;
+   std::vector<std::pair<int, int>> robots_position;
+   robots_position.push_back(std::make_pair( position.GetX(), position.GetY()) );
+   BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30);
 }
 
 /****************************************/
