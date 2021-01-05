@@ -40,11 +40,24 @@ function has_discovered_target()
   return detect_targets()
 }
 
-# Continue random search
+# Random walk search
 function random_search()
 { 
   next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
   next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  goto(next_position.x, next_position.y)
+}
+
+# Random belief map search
+function random_belief_search()
+{ 
+  next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+  next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  while (get_belief(next_position.x, next_position.y) < 0.1)
+  { 
+    next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+    next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  }
   goto(next_position.x, next_position.y)
 }
 
@@ -77,7 +90,7 @@ function step() {
     else { 
       if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
       {
-        random_search()
+        random_belief_search()
         current_search_step = current_search_step + 1
       }
     }
@@ -86,6 +99,11 @@ function step() {
   # The robot that found the target stays at the meeting point and broacast its info
   else if ( current_state == STATE_FOUND ){ 
     debug.print("Found the target")
+    found_target_info = virtual_stigmergy.get("found_target_info")
+    if (found_target_info.found_by < id)
+    {
+      current_state = STATE_RELAY
+    }
   }
   # At some point the other robots go the meeting point and see if another robot found something
   else if ( current_state == STATE_MEETING ){ 
