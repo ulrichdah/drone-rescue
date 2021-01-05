@@ -3,17 +3,19 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 BeliefMap::BeliefMap(const std::string& initial_belief_map_filename){
             std::ifstream file(initial_belief_map_filename);
             file >> size_x_ >> size_y_;
-            belief_map_ = std::vector<std::vector<float>>(size_x_);
             for (int i = 0; i <= size_x_; i++)
             {
-                belief_map_[i] = std::vector<float>(size_y_);
+                belief_map_.push_back(std::vector<float>());
                 for (int j = 0; j <= size_y_; j++)
                 {
-                    file >> belief_map_[i][j];
+                    float value;
+                    file >> value;
+                    belief_map_[i].push_back(value);
                 } 
             }  
         }
@@ -26,9 +28,11 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
                 for (int j = 0; j <= size_y; j++)
                 {
                     float belief = 0.0;
-                    for (int k = 0; k <= robots_position.size(); k++)
+                    for (int k = 0; k < robots_position.size(); k++)
                     {
-                        belief += ComputeBelief(i, j, robots_position[k].first, robots_position[k].second);
+                        int shifted_rposx = robots_position[k].first + size_x/2;
+                        int shifted_rposy = robots_position[k].second + size_y/2;
+                        belief += ComputeBelief(i, j, shifted_rposx, shifted_rposy, (size_x+size_y)/8);
                     } 
                     if (belief > 1.0){
                         belief = 1.0;
@@ -40,11 +44,15 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
             }  
         }
 
-float BeliefMap::ComputeBelief(int i, int j, int robot_i, int robot_j){
-            float distance = std::sqrt(std::pow(i-robot_i,2) + std::pow(j-robot_j,2));
-            float belief = 1.0 - ( distance / 1.0 );
+float BeliefMap::ComputeBelief(int i, int j, int robot_i, int robot_j, int damping){
+            float distance = std::sqrt(std::pow((float)(i-robot_i)/damping,2) + std::pow((float)(j-robot_j)/damping,2));
+            float belief = 1.0 - distance;
+            std::cout << i << " " << j << " " <<  robot_i << " " <<  robot_j << " " <<  damping << " " <<  distance << " " <<  belief;
             if (belief > 1.0){
                 belief = 1.0;
+            } else if (belief < 0.0){
+                belief = 0.0;
             }
+            std::cout << " " <<  belief << std::endl;
             return belief;
         }

@@ -15,8 +15,9 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
    AddEntity(*grass);
 
    std::vector<std::pair<int, int>> robots_position;
-   robots_position.push_back(std::make_pair(4,4));
+   robots_position.push_back(std::make_pair(2,4));
    robots_position.push_back(std::make_pair(7,7));
+   robots_position.push_back(std::make_pair(8,2));
    BeliefMap::CreateFakeBeliefMap(robots_position, 20, 20);
 
    // Initial belief map
@@ -30,12 +31,12 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
          AddBeliefBox(CVector3(i - world_offset_x, j - world_offset_y, 0.0),
                      ConvertBeliefToColor(belief_map.GetCaseBelief(i,j)));
       } 
-   } 
+   }
 }
 
 void MapLoopFunctions::AddBeliefBox(const CVector3& position, const CVector3& color){
    // Create the grass space
-   CBoxEntity* box = new CBoxEntity("",                     // the id
+   CBoxEntity* box = new CBoxEntity("c" + (int)(position.GetX()) + (int)(position.GetY()),                     // the id
                                  CVector3(position.GetX(),position.GetY(),position.GetZ()),     // the position of the base center in m
                                  CQuaternion(),             // the orientation
                                  false,                     // this box is not movable
