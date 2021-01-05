@@ -4,6 +4,7 @@
 #include <buzz/argos/buzz_controller_spiri.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_colored_blob_perspective_camera_sensor.h>
+#include "map/belief_map.h"
 
 #include <random>
 #include <chrono>
@@ -39,6 +40,8 @@ public:
 
    std::pair<float, float> GetGPSPosition();
 
+   float GetBelief(const CVector2& position);
+
 protected:
 
    virtual buzzvm_state RegisterFunctions();
@@ -46,7 +49,7 @@ protected:
 private:
 
    std::default_random_engine random_engine_;
-
+   BeliefMap belief_map_;
 };
 }
 #endif

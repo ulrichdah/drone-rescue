@@ -9,10 +9,10 @@
 BeliefMap::BeliefMap(const std::string& initial_belief_map_filename){
             std::ifstream file(initial_belief_map_filename);
             file >> size_x_ >> size_y_;
-            for (int i = 0; i <= size_x_; i++)
+            for (int i = 0; i < size_x_; i++)
             {
                 belief_map_.push_back(std::vector<float>());
-                for (int j = 0; j <= size_y_; j++)
+                for (int j = 0; j < size_y_; j++)
                 {
                     float value;
                     file >> value;
@@ -25,9 +25,9 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
             std::ofstream file("/home/docker/simulation/sample_maps/fake0.txt");
             file << size_x << " " << size_y << std::endl;
             file << std::fixed << std::setprecision(4);
-            for (int i = 0; i <= size_x; i++)
+            for (int i = 0; i < size_x; i++)
             {
-                for (int j = 0; j <= size_y; j++)
+                for (int j = 0; j < size_y; j++)
                 {
                     float belief = 0.0;
                     for (int k = 0; k < robots_position.size(); k++)
@@ -52,16 +52,16 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
             std::ifstream previous_map(existing_map);  
             int temp;
             previous_map >> temp >> temp;
-            std::vector<float> previous_beliefs(size_x*size_y);
+            std::vector<float> previous_beliefs;//(size_x*size_y);
             for (int i = 0; i < size_x; i++)
             {
                 for (int j = 0; j < size_y; j++)
                 {
                     float belief;
                     previous_map >> belief;
-                    previous_beliefs[i*size_x+j] = belief;
+                    previous_beliefs.push_back(belief);
                 } 
-            }
+            } 
 
             // Write new file
             std::ofstream file("/home/docker/simulation/sample_maps/fake0.txt");
@@ -85,7 +85,7 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
                     file << belief << " ";
                 } 
                 file << std::endl;
-            }  
+            }    
         }
 
 float BeliefMap::ComputeBelief(int i, int j, int robot_i, int robot_j, int damping){

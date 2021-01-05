@@ -1,11 +1,22 @@
 #include <string>
 #include <vector>
-
+#include <argos3/core/utility/math/vector2.h>
+#include <argos3/core/utility/datatypes/set.h>
+using namespace argos;
 class BeliefMap {
     public:
+        BeliefMap(){}
         BeliefMap(const std::string& initial_belief_map_filename);
 
         float GetCaseBelief(int i, int j) {
+            return belief_map_[i][j];
+        }
+
+        float GetWorldPositionBelief(const CVector2& position) {
+            float world_offset_x = - size_x_/2 - 0.5;
+            float world_offset_y = - size_y_/2 - 0.5;
+            int i = static_cast<int>(std::round(position.GetX() - world_offset_x));
+            int j = static_cast<int>(std::round(position.GetY() - world_offset_y));
             return belief_map_[i][j];
         }
 

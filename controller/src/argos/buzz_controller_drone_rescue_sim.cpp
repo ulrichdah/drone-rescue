@@ -31,8 +31,16 @@ CBuzzControllerDroneRescueSim::~CBuzzControllerDroneRescueSim() {
 void CBuzzControllerDroneRescueSim::Init(TConfigurationNode& t_node)  {
    CBuzzControllerSpiri::Init(t_node);
    m_pcCamera->Enable();
+   belief_map_ = BeliefMap("/home/docker/simulation/sample_maps/fake0.txt");
 }
 
+/****************************************/
+/****************************************/
+
+float CBuzzControllerDroneRescueSim::GetBelief(const CVector2& position) {
+   return belief_map_.GetWorldPositionBelief(position);
+}
+   
 /****************************************/
 /****************************************/
 

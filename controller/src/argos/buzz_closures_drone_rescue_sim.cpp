@@ -55,6 +55,47 @@ static int BuzzRandUniform(buzzvm_t vm){
 /****************************************/
 /****************************************/
 
+static int BuzzGoto(buzzvm_t vm) {
+   /* Push the vector components */
+   buzzvm_lload(vm, 1);
+   buzzvm_lload(vm, 2);
+   /* Create a new vector with that */
+   CVector2 position;
+   buzzobj_t tX = buzzvm_stack_at(vm, 2);
+   buzzobj_t tY = buzzvm_stack_at(vm, 1);
+   if(tX->o.type == BUZZTYPE_INT) position.SetX(tX->i.value);
+   else if(tX->o.type == BUZZTYPE_FLOAT) position.SetX(tX->f.value);
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "goto_abs(x,y): expected %s, got %s in first argument",
+                      buzztype_desc[BUZZTYPE_FLOAT],
+                      buzztype_desc[tX->o.type]
+         );
+      return vm->state;
+   }      
+   if(tY->o.type == BUZZTYPE_INT) position.SetY(tY->i.value);
+   else if(tY->o.type == BUZZTYPE_FLOAT) position.SetY(tY->f.value);
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "goto_abs(x,y): expected %s, got %s in second argument",
+                      buzztype_desc[BUZZTYPE_FLOAT],
+                      buzztype_desc[tY->o.type]
+         );
+      return vm->state;
+   }
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->GoTo(position);
+   return buzzvm_ret0(vm);
+}
+
+/****************************************/
+/****************************************/
+
 static int BuzzRandGauss(buzzvm_t vm){
 
    buzzvm_lload(vm, 1);
@@ -96,47 +137,6 @@ static int BuzzRandGauss(buzzvm_t vm){
    buzzvm_pushf(vm, random_value);
 
    return buzzvm_ret1(vm);
-}
-
-/****************************************/
-/****************************************/
-
-static int BuzzGoto(buzzvm_t vm) {
-   /* Push the vector components */
-   buzzvm_lload(vm, 1);
-   buzzvm_lload(vm, 2);
-   /* Create a new vector with that */
-   CVector2 position;
-   buzzobj_t tX = buzzvm_stack_at(vm, 2);
-   buzzobj_t tY = buzzvm_stack_at(vm, 1);
-   if(tX->o.type == BUZZTYPE_INT) position.SetX(tX->i.value);
-   else if(tX->o.type == BUZZTYPE_FLOAT) position.SetX(tX->f.value);
-   else {
-      buzzvm_seterror(vm,
-                      BUZZVM_ERROR_TYPE,
-                      "goto_abs(x,y): expected %s, got %s in first argument",
-                      buzztype_desc[BUZZTYPE_FLOAT],
-                      buzztype_desc[tX->o.type]
-         );
-      return vm->state;
-   }      
-   if(tY->o.type == BUZZTYPE_INT) position.SetY(tY->i.value);
-   else if(tY->o.type == BUZZTYPE_FLOAT) position.SetY(tY->f.value);
-   else {
-      buzzvm_seterror(vm,
-                      BUZZVM_ERROR_TYPE,
-                      "goto_abs(x,y): expected %s, got %s in second argument",
-                      buzztype_desc[BUZZTYPE_FLOAT],
-                      buzztype_desc[tY->o.type]
-         );
-      return vm->state;
-   }
-   /* Get pointer to the controller */
-   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
-   buzzvm_gload(vm);
-   /* Call function */
-   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->GoTo(position);
-   return buzzvm_ret0(vm);
 }
 
 /****************************************/
@@ -232,6 +232,50 @@ static int BuzzUpdateGPSPosition(buzzvm_t vm) {
    return buzzvm_ret0(vm);
 }
 
+
+/****************************************/
+/****************************************/
+
+static int BuzzGetBelief(buzzvm_t vm) {
+   /* Push the vector components */
+   buzzvm_lload(vm, 1);
+   buzzvm_lload(vm, 2);
+   /* Create a new vector with that */
+   CVector2 position;
+   buzzobj_t tX = buzzvm_stack_at(vm, 2);
+   buzzobj_t tY = buzzvm_stack_at(vm, 1);
+   if(tX->o.type == BUZZTYPE_INT) position.SetX(tX->i.value);
+   else if(tX->o.type == BUZZTYPE_FLOAT) position.SetX(tX->f.value);
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "goto_abs(x,y): expected %s, got %s in first argument",
+                      buzztype_desc[BUZZTYPE_FLOAT],
+                      buzztype_desc[tX->o.type]
+         );
+      return vm->state;
+   }      
+   if(tY->o.type == BUZZTYPE_INT) position.SetY(tY->i.value);
+   else if(tY->o.type == BUZZTYPE_FLOAT) position.SetY(tY->f.value);
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "goto_abs(x,y): expected %s, got %s in second argument",
+                      buzztype_desc[BUZZTYPE_FLOAT],
+                      buzztype_desc[tY->o.type]
+         );
+      return vm->state;
+   }
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   float belief = reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->GetBelief(position);
+   
+   buzzvm_pushf(vm, belief);
+   return buzzvm_ret1(vm);
+}
+
 /****************************************/
 /************ Registration **************/
 /****************************************/
@@ -261,6 +305,10 @@ buzzvm_state CBuzzControllerDroneRescueSim::RegisterFunctions() {
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "update_gps_position", 1));
    buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzUpdateGPSPosition));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "get_belief", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzGetBelief));
    buzzvm_gstore(m_tBuzzVM);
 
    return m_tBuzzVM->state;
