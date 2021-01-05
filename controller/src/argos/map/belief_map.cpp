@@ -47,7 +47,6 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
 float BeliefMap::ComputeBelief(int i, int j, int robot_i, int robot_j, int damping){
             float distance = std::sqrt(std::pow((float)(i-robot_i)/damping,2) + std::pow((float)(j-robot_j)/damping,2));
             float belief = 1.0 - distance;
-            std::cout << i << " " << j << " " <<  robot_i << " " <<  robot_j << " " <<  damping << " " <<  distance << " " <<  belief;
             if (belief > 1.0){
                 belief = 1.0;
             } else if (belief < 0.0){
