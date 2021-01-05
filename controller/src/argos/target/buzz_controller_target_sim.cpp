@@ -34,7 +34,14 @@ void CBuzzControllerTargetSim::Init(TConfigurationNode& t_node)  {
    CVector3 position = m_pcPos->GetReading().Position;
    std::vector<std::pair<int, int>> robots_position;
    robots_position.push_back(std::make_pair( position.GetX(), position.GetY()) );
-   BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30);
+
+   std::ifstream f("/home/docker/simulation/sample_maps/fake0.txt");
+   if (f.good()) {
+      BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30, "/home/docker/simulation/sample_maps/fake0.txt");
+   }
+   else {
+      BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30);
+   }
 }
 
 /****************************************/

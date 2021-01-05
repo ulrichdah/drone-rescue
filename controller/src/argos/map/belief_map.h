@@ -19,6 +19,9 @@ class BeliefMap {
 
         static void CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robots_position, int size_x, int size_y);
 
+        static void CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robots_position, int size_x, int size_y,
+                                    const std::string& existing_map);
+
         static float ComputeBelief(int i, int j, int robot_i, int robot_j, int damping);
 
     private:
