@@ -20,9 +20,11 @@
 
 # Networking
 
+- `sudo apt install libnl*`
+
 - Install batman-adv: download the alfred, batctl and batman-adv sources from
   `https://downloads.open-mesh.org/batman/releases/batman-adv-2020.4/`. Extract
-  the `.tar.gz` archives and run `make` then `make install` in each.
+  the `.tar.gz` archives and run `make` then `sudo make install` in each.
 
 - Change hostname in `/etc/hostname`
 
