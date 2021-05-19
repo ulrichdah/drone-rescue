@@ -14,6 +14,10 @@
 
 - Place this file https://github.com/IntelRealSense/librealsense/blob/master/config/99-realsense-libusb.rules in `/etc/udev/rules.d/`
 
+# Drone control stack
+
+- Clone `https://git.mistlab.ca/dasto/drones` and checkout branch `ros_drones_ws`. Follow the instructions from there. Use the `build_m100.sh` script to build the drone stack.
+
 # Networking
 
 - Install batman-adv: download the alfred, batctl and batman-adv sources from
@@ -39,10 +43,8 @@ iface lo inet loopback
 - Add IP infos for ROS in `~/.bashrc`: Append the following lines: 
 ```
 source /opt/ros/kinetic/setup.bash
-source ~/drivers_ws/devel/setup.bash
 
 export ROS_IP=192.168.143.125
-export ROS_MASTER_URI=http://192.168.143.125:11311
 export ROBOT_ID=0
 ```
 
@@ -51,6 +53,7 @@ export ROBOT_ID=0
 # Containers
 
 - In `robot/object-detection/`, run : `docker build . --tag lajoiepy/object-detection`
+- In `robot/bridge/`, run : `docker build . --tag lajoiepy/ros-bridge`
 
 # How to run
 
@@ -58,3 +61,4 @@ All the important commands have an alias in `~/.bash_aliases`.
 
 - `cameras` : launches the cameras
 - `objects` : launches the object detection
+- `ros2bridge` : launches the ROS1 to ROS2 bridge
