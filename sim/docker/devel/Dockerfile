@@ -55,14 +55,7 @@ RUN mkdir /home/docker/code &&\
 RUN touch /home/docker/code/User/settings.json &&\
     echo "{ \"files.associations\": { \"*.bzz\":\"python\" } }" > /home/docker/code/User/settings.json
     
-# Setup deployment key
-RUN mkdir /root/.ssh/
-ADD argos-key /root/.ssh/argos_id_rsa
-RUN touch /root/.ssh/known_hosts && \ 
-  ssh-keyscan github.com >> /root/.ssh/known_hosts
-RUN echo "# ~/.ssh/config \nHost github-argos \nHostName github.com \nUser git \nIdentityFile ~/.ssh/argos_id_rsa" >> ~/.ssh/config
-
-RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get update && apt-get install -y \
     graphviz \
     graphviz-dev \
@@ -110,15 +103,15 @@ RUN cd /home/docker/buzz &&\
 
 # Clone simulation
 RUN cd /home/docker/ &&\
-    git clone github-argos:lajoiepy/drone-rescue-simulation.git simulation
+    git clone https://github.com/lajoiepy/drone-rescue.git
 
 # Setup debug config for visual studio code
-RUN mkdir /home/docker/simulation/.vscode && touch /home/docker/simulation/.vscode/launch.json &&\
+RUN mkdir /home/docker/drone-rescue/sim/.vscode && touch /home/docker/drone-rescue/sim/.vscode/launch.json &&\
     echo "{\"version\": \"0.2.0\",\"configurations\": [{\"name\": \"(gdb) Attach\", \"type\": \"cppdbg\", \"request\": \"attach\", \"program\" : \"/usr/local/bin/argos3\", \"processId\": \"\${command:pickProcess}\", \"MIMode\": \"gdb\", \"setupCommands\": [ {\"description\": \"Enable pretty-printing for gdb\", \"text\": \"-enable-pretty-printing\",\"ignoreFailures\": true}]}]}" \
-    > /home/docker/simulation/.vscode/launch.json
+    > /home/docker/drone-rescue/sim/.vscode/launch.json
 
 # Compile C++ controller
-RUN cd /home/docker/simulation/controller &&\
+RUN cd /home/docker/drone-rescue/sim/controller &&\
     mkdir build &&\
     cd build/ &&\
     cmake ../src &&\
@@ -126,7 +119,7 @@ RUN cd /home/docker/simulation/controller &&\
     make install
 
 # Compile buzz script
-RUN cd /home/docker/simulation/argos_simulation &&\
+RUN cd /home/docker/drone-rescue/sim/argos_simulation &&\
     bzzc search_example.bzz &&\
     bzzc target_drift_example.bzz
 
@@ -135,5 +128,5 @@ RUN cd /home/docker/simulation/argos_simulation &&\
 #    git config --global user.name "Pierre-Yves Lajoie"
 
 # Entry point to start the simulation
-WORKDIR /home/docker/simulation/argos_simulation
+WORKDIR /home/docker/drone-rescue/sim/argos_simulation
 # ENTRYPOINT argos3 -c robust_distributed_slam.argos
