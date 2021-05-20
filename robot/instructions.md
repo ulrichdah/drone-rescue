@@ -14,30 +14,38 @@
 
 - Place this file https://github.com/IntelRealSense/librealsense/blob/master/config/99-realsense-libusb.rules in `/etc/udev/rules.d/`
 
-# Drone control stack
+# DJI SDK
 
-- Clone `https://git.mistlab.ca/dasto/drones` and checkout branch `ros_drones_ws`. Follow the instructions from there. Use the `build_m100.sh` script to build the drone stack.
+- Clone the SDK `git clone https://github.com/dji-sdk/Onboard-SDK.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
+
+- Clone the ROS driver for SDK into a ROS workspace `git clone https://github.com/dji-sdk/Onboard-SDK-ROS.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
 
 # Networking
 
-- `sudo apt install libnl*`
+- `sudo apt install libnl* libcap* libgps*`
+
+- For the TX2, download the `Jetson TX2 Sources` for your L4T version (https://developer.nvidia.com/embedded/linux-tegra-archive). Unpack the sources and in kernel/kernel-$VERSION$ run `zcat /proc/config.gz > .config; make prepare; make modules_prepare`. An even better solution is to use the automated scripts for your L4T version https://github.com/jetsonhacks/buildJetsonTX2Kernel.
 
 - Install batman-adv: download the alfred, batctl and batman-adv sources from
   `https://downloads.open-mesh.org/batman/releases/batman-adv-2020.4/`. Extract
-  the `.tar.gz` archives and run `make` then `sudo make install` in each.
+  the `.tar.gz` archives and run `make` then `sudo make install` in each. On TX2, specify the directory `$PATH_TO_KERNEL_SOURCES$/kernel/kernel-$VERSION$` in the arg `KERNELPATH` in the `Makefile`. Copy the generated `batman-adv.ko` in `/lib/modules/$(uname -r)/`, run `sudo depmod -a`.
 
 - Change hostname in `/etc/hostname`
 
-- `sudo cp /home/dji/drone-rescue/robot/config/copymac.sh
-  /usr/local/bin/copymac.sh`
+- `sudo cp /home/dji/Documents/drone-rescue/robot/config/copymac.sh /usr/local/bin/copymac.sh`
 
-- `sudo cp /home/dji/drone-rescue/robot/config/batman-cl@.service
-  /etc/systemd/system/batman-cl@.service`
+- `sudo cp /home/dji/Documents/drone-rescue/robot/config/batman-cl@.service  /etc/systemd/system/batman-cl@.service`
 
 - Make sure `/etc/network/interfaces``contains only:
 ```
 auto lo
 iface lo inet loopback
+```
+
+- In `/etc/NetworkManager/conf.d/default-wifi-powersave-on.conf`, append 
+```
+[keyfile]
+unmanaged-devices=wlan0
 ```
 
 - `sudo systemctl enable batman-cl@wlan0`, then reboot.
