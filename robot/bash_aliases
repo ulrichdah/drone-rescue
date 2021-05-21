@@ -4,3 +4,4 @@ alias exposureoff='rosrun dynamic_reconfigure dynparam set /r$(arg robot_id)/d40
 alias exposurefix='rosrun dynamic_reconfigure dynparam set /r$(arg robot_id)/t265/tracking_module exposure '
 alias ros2bridge='docker run --net=host -it lajoiepy/ros-bridge $ROS_IP'
 alias objects='docker run --net=host -it lajoiepy/object-detection $ROS_IP $ROBOT_ID'
+alias dronestart='source /home/dji/Documents/sdk-ws/devel/setup.bash; roslaunch /home/dji/Documents/drone-rescue/robot/dji_vehicle_node.launch'

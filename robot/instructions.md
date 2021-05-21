@@ -1,6 +1,6 @@
 # General setup
 
-- Clone this repo in `/home/dji`
+- Clone this repo in `/home/dji/Documents`
 
 - Copy `robot/bash_aliases` file to `~/.bash_aliases`: run `cp robot/bash_aliases ~/.bash_aliases`
 
@@ -19,6 +19,10 @@
 - Clone the SDK `git clone https://github.com/dji-sdk/Onboard-SDK.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
 
 - Clone the ROS driver for SDK into a ROS workspace `git clone https://github.com/dji-sdk/Onboard-SDK-ROS.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
+
+- Source the DJI SDK workspace and launch the node : `roslaunch dji_vehicle_node.launch`. You will need to adapt the app ID and key in the launch file to the one in your DJI account (look into the developper documentation).
+
+- If you encounter problems launching the SDK node, look into this post: `https://forum.dji.com/thread-216529-1-1.html`.
 
 # Networking
 
@@ -72,3 +76,4 @@ All the important commands have an alias in `~/.bash_aliases`.
 - `cameras` : launches the cameras
 - `objects` : launches the object detection
 - `ros2bridge` : launches the ROS1 to ROS2 bridge
+- `dronestart` : launches the drone driver
