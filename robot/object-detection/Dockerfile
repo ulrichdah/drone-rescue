@@ -98,7 +98,7 @@ RUN apt-get update && apt-get install -y python-catkin-pkg python-rosdep &&\
     && wstool init -j8 src melodic-desktop.rosinstall \ 
     && rosdep install --skip-keys python-catkin-pkg-modules --skip-keys python-rosdep-modules --from-paths src --ignore-src --rosdistro melodic -y \
     && export PYTHONPATH=/usr/local/lib/python3.6/dist-packages \
-    && ./src/catkin/bin/catkin_make_isolated --install --install-space /opt/ros/melodic -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Release \
+    && ./src/catkin/bin/catkin_make_isolated --install --install-space /opt/ros/melodic -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Release -j2 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 

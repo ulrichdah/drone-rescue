@@ -1,4 +1,4 @@
-alias cameras='roslaunch /home/rover/swarm-explorer/robot/rs_d400_and_t265.launch robot_id:=$ROBOT_ID'
+alias cameras='roslaunch /home/dji/Documents/drone-rescue/robot/rs_camera.launch robot_id:=$ROBOT_ID'
 alias entercontainer='docker exec -it $(docker container ls -q) /bin/bash'
 alias exposureoff='rosrun dynamic_reconfigure dynparam set /r$(arg robot_id)/d400/rgb_camera enable_auto_exposure 0 && rosrun dynamic_reconfigure dynparam set /r$(arg robot_id)/d400/rgb_camera enable_auto_white_balance 0'
 alias exposurefix='rosrun dynamic_reconfigure dynparam set /r$(arg robot_id)/t265/tracking_module exposure '
