@@ -16,6 +16,8 @@
 
 # DJI SDK
 
+- Don't forget to plug UART1 into the OSDK expansion module. It is not clear in the instructions, look here: `https://developer.dji.com/onboard-sdk/documentation/quickstart/device-connection.html#using-m300-rtk`
+
 - Clone the SDK `git clone https://github.com/dji-sdk/Onboard-SDK.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
 
 - Clone the ROS driver for SDK into a ROS workspace `git clone https://github.com/dji-sdk/Onboard-SDK-ROS.git`, checkout a stable version for the M300 `git checkout 4.1.0`, then build (check their instructions).
