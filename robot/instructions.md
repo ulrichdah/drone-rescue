@@ -83,7 +83,7 @@ All the important commands have an alias in `~/.bash_aliases`.
 
 # Development
 
-- Use DJI Assistant 2 (Enterprise) to perform hardware-in-the-loop simulation.
+- Use DJI Assistant 2 (Enterprise) to perform hardware-in-the-loop simulation. To do so: remove the propellers for safety, connect you computer to the debug USB-C port on the drone, turn on the drone, launch DJI Assistant 2, click on the M300 icon, go in the Simulation tab, start the simulation, change the location (long/lat) to the area of your field tests. At this point, you can test your onboard computer controller and see its effects (takeoff, waypoints, etc.). For example, with `dronestart` then `flightcontrol` then `press [a]` you can test the takeoff procedure.
 
 - Make sure to have firmwares version `V01.00.0214` for both the remote controller and the drone. Otherwise, you will face weird issues of restricted flight areas.
 
