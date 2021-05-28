@@ -80,3 +80,11 @@ All the important commands have an alias in `~/.bash_aliases`.
 - `ros2bridge` : launches the ROS1 to ROS2 bridge
 - `dronestart` : launches the drone driver
 - `flightcontrol` : launches the flight control testing node (to send setpoints)
+
+# Development
+
+- Use DJI Assistant 2 (Enterprise) to perform hardware-in-the-loop simulation.
+
+- Make sure to have firmwares version `V01.00.0214` for both the remote controller and the drone. Otherwise, you will face weird issues of restricted flight areas.
+
+- Look into `sdk-ws/src/Onboard-SDK-ROS/src/dji_osdk_ros/samples/flight_control_node.cpp` for simple example of how to send position control commands to the drone.
