@@ -41,3 +41,5 @@ Configurations with respect to the simulation arena need to be also changed in t
 At the end of the simulation you should expect this kind of result where the drones establish a communication link from the meeting point to the target:
 ![Expected result](media/expected_result.png)
 A short video showing the execution is also available in the `media` folder.
+
+Look [here](https://github.com/MISTLab/DORA-Explorer/blob/edc2cfbf0ab87859ddf9c4d9779dd59f4c1b9c73/sim/controller/src/argos/buzz_controller_drone_sim.cpp#L115) and [here](https://github.com/MISTLab/DORA-Explorer/blob/master/sim/benchmarking/compute_metrics.py) to integrate evaluation metrics.
