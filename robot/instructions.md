@@ -28,6 +28,8 @@
 
 # Networking
 
+The following step are a tentative solution to make batman-adv work. If it doesn't, you'll probably need to upgrade the Jetpack Image. Look here for more instructions on that: https://docs.nvidia.com/jetpack-l4t/2_3/content/developertools/mobile/jetpack/l4t/2.3/jetpack_l4t_install.htm
+
 - `sudo apt install libnl* libcap* libgps*`
 
 - For the TX2, download the `Jetson TX2 Sources` for your L4T version (https://developer.nvidia.com/embedded/linux-tegra-archive). Unpack the sources and in kernel/kernel-$VERSION$ run `zcat /proc/config.gz > .config; make prepare; make modules_prepare`. An even better solution is to use the automated scripts for your L4T version https://github.com/jetsonhacks/buildJetsonTX2Kernel.
