@@ -42,6 +42,10 @@ public:
 
    float GetBelief(const CVector2& position);
 
+   void LogRelay(const int& step);
+
+   void LogFoundTarget(const int& step)
+
 protected:
 
    virtual buzzvm_state RegisterFunctions();

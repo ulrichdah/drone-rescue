@@ -276,6 +276,58 @@ static int BuzzGetBelief(buzzvm_t vm) {
    return buzzvm_ret1(vm);
 }
 
+static int BuzzLogFoundTarget(buzzvm_t vm) {
+   /* Push the vector components */
+   buzzvm_lload(vm, 1);
+
+   int step;
+   buzzobj_t tstep = buzzvm_stack_at(vm, 1);
+   if(tstep->o.type == BUZZTYPE_INT) step = tstep->i.value;
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "log_found_target(step): expected %s, got %s in second argument",
+                      buzztype_desc[BUZZTYPE_INT],
+                      buzztype_desc[tstep->o.type]
+         );
+      return vm->state;
+   }
+
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogFoundTarget(step);
+
+   return buzzvm_ret0(vm);
+}
+
+static int BuzzLogRelay(buzzvm_t vm) {
+   /* Push the vector components */
+   buzzvm_lload(vm, 1);
+
+   int step;
+   buzzobj_t tstep = buzzvm_stack_at(vm, 1);
+   if(tstep->o.type == BUZZTYPE_INT) step = tstep->i.value;
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "log_relay(step): expected %s, got %s in second argument",
+                      buzztype_desc[BUZZTYPE_INT],
+                      buzztype_desc[tstep->o.type]
+         );
+      return vm->state;
+   }
+
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogRelay(step);
+
+   return buzzvm_ret0(vm);
+}
+
 /****************************************/
 /************ Registration **************/
 /****************************************/
@@ -309,6 +361,14 @@ buzzvm_state CBuzzControllerDroneRescueSim::RegisterFunctions() {
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "get_belief", 1));
    buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzGetBelief));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_found_target", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzLogFoundTarget));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_relay", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzLogRelay));
    buzzvm_gstore(m_tBuzzVM);
 
    return m_tBuzzVM->state;

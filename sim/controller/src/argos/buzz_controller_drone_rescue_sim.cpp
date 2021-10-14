@@ -3,9 +3,15 @@
 #include <stdlib.h>
 #include <fstream>
 #include <stdio.h>
+#include <sstream>
+#include <algorithm>
+#include <cmath>
 
 namespace buzz_drone_rescue_sim {
 
+
+const std::string TARGET_FILE = "results/target_steps.txt";
+const std::string RELAY_FILE = "results/relay_steps.txt";
 
 /****************************************/
 /****************************************/
@@ -81,6 +87,22 @@ std::pair<float, float> CBuzzControllerDroneRescueSim::GetGPSPosition() {
 int CBuzzControllerDroneRescueSim::DetectTargets() {
    int number_of_blobs = m_pcCamera->GetReadings().BlobList.size();
    return number_of_blobs;  
+}
+
+void CBuzzControllerDroneSim::LogFoundTarget(const int& step){
+   
+   std::ofstream result_file;
+   result_file.open(TARGET_FILE, std::ios::out | std::ios::app);
+
+   result_file << step << "," << m_unRobotId << std::endl;
+}
+
+void CBuzzControllerDroneSim::LogRelay(const int& step){
+   
+   std::ofstream result_file;
+   result_file.open(RELAY_FILE, std::ios::out | std::ios::app);
+
+   result_file << step << "," << m_unRobotId << std::endl;
 }
 
 }
