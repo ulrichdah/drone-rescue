@@ -103,7 +103,7 @@ RUN cd /home/docker/buzz &&\
 
 # Clone simulation
 RUN cd /home/docker/ &&\
-    git clone https://github.com/lajoiepy/drone-rescue.git
+    git clone https://github.com/ulrichdah/drone-rescue.git
 
 # Setup debug config for visual studio code
 RUN mkdir /home/docker/drone-rescue/sim/.vscode && touch /home/docker/drone-rescue/sim/.vscode/launch.json &&\
@@ -124,8 +124,8 @@ RUN cd /home/docker/drone-rescue/sim/argos_simulation &&\
     bzzc target_drift_example.bzz
 
 # Put your own git credentials to commit edited code
-#RUN git config --global user.email "lajoie.py@gmail.com" &&\
-#    git config --global user.name "Pierre-Yves Lajoie"
+RUN git config --global user.email "ulrich.dah-achinanon@polymtl.ca" &&\
+    git config --global user.name "Ulrich Dah-Achinanon"
 
 # Entry point to start the simulation
 WORKDIR /home/docker/drone-rescue/sim/argos_simulation
