@@ -5,6 +5,9 @@ include "buzz_includes/search_example/global_variables.bzz"
 include "buzz_includes/debug.bzz"
 
 var virtual_stigmergy
+var found_gps
+var nb_step = 0
+
 
 # Executed at init time
 function init() {
@@ -20,6 +23,7 @@ function init() {
 
   # Set initial state
   current_state = STATE_SEARCH
+  found_gps = {.x = 0, .y = 0}
 
   # Set swarm and virtual stigmergy
   virtual_stigmergy = stigmergy.create(1)
@@ -60,10 +64,19 @@ function random_belief_search()
   goto(next_position.x, next_position.y)
 }
 
+function log_metrics(step, state) {
+  if (state == STATE_FOUND) {
+    log_found_target(step)
+  } else if (state == STATE_RELAY) {
+    log_relay(step)
+  }
+}
+
 # Executed every time step
 function step() {
   # Update sensors
   update_gps_position()
+  nb_step = nb_step + 1
 
   ### State machine ###  
   ## Searching for the target
@@ -71,10 +84,8 @@ function step() {
     debug.print("Searching")
     # Look if a target is discovered
     if ( has_discovered_target() != 0 ) { 
-      found_target_info.found_by = id
-      found_target_info.x = gps_position.x
-      found_target_info.y = gps_position.y
-      virtual_stigmergy.put("found_target_info", found_target_info)
+      found_gps.x = gps_position.x
+      found_gps.y = gps_position.y
       goto(MEETING_POINT.x, MEETING_POINT.y)
       current_state = STATE_FOUND
       current_search_step = 0      
@@ -100,10 +111,18 @@ function step() {
   # The robot that found the target stays at the meeting point and broacast its info
   else if ( current_state == STATE_FOUND ){ 
     debug.print("Found the target")
-    found_target_info = virtual_stigmergy.get("found_target_info")
-    if (found_target_info.found_by != id)
-    {
-      current_state = STATE_RELAY
+    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
+      found_target_info = virtual_stigmergy.get("found_target_info")
+      if (found_target_info.found_by == -1) # We should only have one robot that broadcasts the found target
+      {
+        log_metrics(nb_step, STATE_FOUND)
+        found_target_info.found_by = id
+        found_target_info.x = found_gps.x
+        found_target_info.y = found_gps.y
+        virtual_stigmergy.put("found_target_info", found_target_info)
+      } else {
+        current_state = STATE_RELAY
+      }
     }
   }
   # At some point the other robots go the meeting point and see if another robot found something
@@ -112,10 +131,8 @@ function step() {
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
       # Look for targets when comming back to meeting point
       if ( has_discovered_target() != 0 ) { 
-        found_target_info.found_by = id
-        found_target_info.x = gps_position.x
-        found_target_info.y = gps_position.y
-        virtual_stigmergy.put("found_target_info", found_target_info)
+        found_gps.x = gps_position.x
+        found_gps.y = gps_position.y
         goto(MEETING_POINT.x, MEETING_POINT.y)
         current_state = STATE_FOUND
         current_search_step = 0      
@@ -140,6 +157,7 @@ function step() {
   }
   else if ( current_state == STATE_RELAY )
   {
+    log_metrics(nb_step, STATE_RELAY)
     relay_id = id
     if (relay_id < found_target_info.found_by){
       relay_id = relay_id + 1
