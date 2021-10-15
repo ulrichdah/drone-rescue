@@ -42,9 +42,9 @@ public:
 
    float GetBelief(const CVector2& position);
 
-   void LogRelay(const int& step);
+   void LogRelay(const int& step, const int& id);
 
-   void LogFoundTarget(const int& step)
+   void LogFoundTarget(const int& step, const int& id);
 
 protected:
 

@@ -66,9 +66,9 @@ function random_belief_search()
 
 function log_metrics(step, state) {
   if (state == STATE_FOUND) {
-    log_found_target(step)
+    log_found_target(step, id)
   } else if (state == STATE_RELAY) {
-    log_relay(step)
+    log_relay(step, id)
   }
 }
 

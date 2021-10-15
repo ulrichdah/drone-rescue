@@ -89,20 +89,20 @@ int CBuzzControllerDroneRescueSim::DetectTargets() {
    return number_of_blobs;  
 }
 
-void CBuzzControllerDroneSim::LogFoundTarget(const int& step){
+void CBuzzControllerDroneRescueSim::LogFoundTarget(const int& step, const int& id){
    
    std::ofstream result_file;
    result_file.open(TARGET_FILE, std::ios::out | std::ios::app);
 
-   result_file << step << "," << m_unRobotId << std::endl;
+   result_file << step << "," << id << std::endl;
 }
 
-void CBuzzControllerDroneSim::LogRelay(const int& step){
+void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id){
    
    std::ofstream result_file;
    result_file.open(RELAY_FILE, std::ios::out | std::ios::app);
 
-   result_file << step << "," << m_unRobotId << std::endl;
+   result_file << step << "," << id << std::endl;
 }
 
 }

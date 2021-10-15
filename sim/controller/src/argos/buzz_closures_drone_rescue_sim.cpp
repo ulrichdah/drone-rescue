@@ -279,14 +279,18 @@ static int BuzzGetBelief(buzzvm_t vm) {
 static int BuzzLogFoundTarget(buzzvm_t vm) {
    /* Push the vector components */
    buzzvm_lload(vm, 1);
+   buzzvm_lload(vm, 2);
 
    int step;
-   buzzobj_t tstep = buzzvm_stack_at(vm, 1);
+   int id;
+   buzzobj_t tstep = buzzvm_stack_at(vm, 2);
+   buzzobj_t tid = buzzvm_stack_at(vm, 1);
+   id = tid->i.value;
    if(tstep->o.type == BUZZTYPE_INT) step = tstep->i.value;
    else {
       buzzvm_seterror(vm,
                       BUZZVM_ERROR_TYPE,
-                      "log_found_target(step): expected %s, got %s in second argument",
+                      "log_found_target(step, id): expected %s, got %s in second argument",
                       buzztype_desc[BUZZTYPE_INT],
                       buzztype_desc[tstep->o.type]
          );
@@ -297,7 +301,7 @@ static int BuzzLogFoundTarget(buzzvm_t vm) {
    buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
    buzzvm_gload(vm);
    /* Call function */
-   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogFoundTarget(step);
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogFoundTarget(step, id);
 
    return buzzvm_ret0(vm);
 }
@@ -305,14 +309,18 @@ static int BuzzLogFoundTarget(buzzvm_t vm) {
 static int BuzzLogRelay(buzzvm_t vm) {
    /* Push the vector components */
    buzzvm_lload(vm, 1);
+   buzzvm_lload(vm, 2);
 
    int step;
-   buzzobj_t tstep = buzzvm_stack_at(vm, 1);
+   int id;
+   buzzobj_t tstep = buzzvm_stack_at(vm, 2);
+   buzzobj_t tid = buzzvm_stack_at(vm, 1);
+   id = tid->i.value;
    if(tstep->o.type == BUZZTYPE_INT) step = tstep->i.value;
    else {
       buzzvm_seterror(vm,
                       BUZZVM_ERROR_TYPE,
-                      "log_relay(step): expected %s, got %s in second argument",
+                      "log_relay(step, id): expected %s, got %s in second argument",
                       buzztype_desc[BUZZTYPE_INT],
                       buzztype_desc[tstep->o.type]
          );
@@ -323,7 +331,7 @@ static int BuzzLogRelay(buzzvm_t vm) {
    buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
    buzzvm_gload(vm);
    /* Call function */
-   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogRelay(step);
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogRelay(step, id);
 
    return buzzvm_ret0(vm);
 }
