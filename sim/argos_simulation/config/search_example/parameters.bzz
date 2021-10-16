@@ -1,6 +1,6 @@
 # Search space parameters
-SEARCH_SPACE = { .minx = -15.0, .miny = -15.0, .maxx = 15.0, .maxy = 15.0}
-MEETING_POINT = { .x = 0.0, .y = -15.0}
+SEARCH_SPACE = { .minx = -10.0, .miny = -10.0, .maxx = 10.0, .maxy = 10.0}
+MEETING_POINT = { .x = 0.0, .y = -10.0}
 
 # Searching drones parameters
 NUMBER_OF_ROBOTS = 3
