@@ -101,7 +101,8 @@ function step() {
     else { 
       if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
       {
-        random_belief_search()
+        # random_belief_search()
+        random_search()
         current_search_step = current_search_step + 1
       } else {
         goto(next_position.x, next_position.y)
@@ -114,6 +115,9 @@ function step() {
     debug.print("Found the target")
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
       found_target_info = virtual_stigmergy.get("found_target_info")
+      if (found_target_info == nil) {
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
+      }
       if (found_target_info.found_by == -1) # We should only have one robot that broadcasts the found target
       {
         log_metrics(nb_step, STATE_FOUND)
@@ -142,6 +146,9 @@ function step() {
     # If another robot found a target, go in relay position
     else {
       found_target_info = virtual_stigmergy.get("found_target_info")
+      if (found_target_info == nil) {
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
+      }
       if (found_target_info.found_by != -1)
       {
         current_state = STATE_RELAY
