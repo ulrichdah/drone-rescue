@@ -102,6 +102,7 @@ RUN cd /home/docker/buzz &&\
     ldconfig
 
 # Clone simulation
+ADD https://api.github.com/repos/ulrichdah/drone-rescue/git/refs/heads/master version.json
 RUN cd /home/docker/ &&\
     git clone https://github.com/ulrichdah/drone-rescue.git
 
@@ -124,9 +125,9 @@ RUN cd /home/docker/drone-rescue/sim/argos_simulation &&\
     bzzc target_drift_example.bzz
 
 # Put your own git credentials to commit edited code
-RUN git config --global user.email "ulrich.dah-achinanon@polymtl.ca" &&\
-    git config --global user.name "Ulrich Dah-Achinanon"
+RUN git config --global user.email "ulrich.dahachinanon@gmail.com" &&\
+    git config --global user.name "ulrichdah"
 
 # Entry point to start the simulation
-WORKDIR /home/docker/drone-rescue/sim/argos_simulation
+# WORKDIR /home/docker/drone-rescue/sim/argos_simulation
 # ENTRYPOINT argos3 -c robust_distributed_slam.argos
