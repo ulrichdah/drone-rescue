@@ -7,6 +7,7 @@ include "buzz_includes/debug.bzz"
 var virtual_stigmergy
 var found_gps
 var nb_step = 0
+var waiting_log = 1
 
 
 # Executed at init time
@@ -157,7 +158,6 @@ function step() {
   }
   else if ( current_state == STATE_RELAY )
   {
-    log_metrics(nb_step, STATE_RELAY)
     relay_id = id
     if (relay_id < found_target_info.found_by){
       relay_id = relay_id + 1
@@ -168,6 +168,10 @@ function step() {
     next_position.x = relay_x
     next_position.y = relay_y
     goto(next_position.x, next_position.y)
+    if ( has_reached(relay_x, relay_y, DELTA_REACHED_POS) != 0 and waiting_log != 0) {
+      log_metrics(nb_step, STATE_RELAY)
+      waiting_log = 0
+    }
     if (math.abs(relay_ratio - 1) < 0.01)
     {
       debug.print("Follow target")
