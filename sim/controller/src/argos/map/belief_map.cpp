@@ -22,7 +22,7 @@ BeliefMap::BeliefMap(const std::string& initial_belief_map_filename){
         }
 
 void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robots_position, int size_x, int size_y){
-            std::ofstream file("/home/docker/simulation/sample_maps/fake0.txt");
+            std::ofstream file("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
             file << size_x << " " << size_y << std::endl;
             file << std::fixed << std::setprecision(4);
             for (int i = 0; i < size_x; i++)
@@ -64,7 +64,7 @@ void BeliefMap::CreateFakeBeliefMap(const std::vector<std::pair<int, int>>& robo
             } 
 
             // Write new file
-            std::ofstream file("/home/docker/simulation/sample_maps/fake0.txt");
+            std::ofstream file("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
             file << size_x << " " << size_y << std::endl;
             file << std::fixed << std::setprecision(4);
             for (int i = 0; i < size_x; i++)

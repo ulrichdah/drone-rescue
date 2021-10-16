@@ -21,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/mviereck/x11docker/master/x11docker
 ```
 If you installed `x11docker`, use the following command while specifying a folder on your host machine to store the log files from the simulation.
 ```
-sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/simulation/argos_simulation/log -- lajoiepy/drones-search-and-rescue:latest
+sudo x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged -v <log-folder-on-host-computer>:/home/docker/drone-rescue/sim/argos_simulation/log -- lajoiepy/drones-search-and-rescue:latest
 ```
 
 # Launching the simulation
@@ -32,7 +32,7 @@ docker exec -it $(docker container ls -q) /bin/bash
 ```
 If you have multiple containers running at the same time, you can replace the `$(docker container ls -q)` with the container ID. The container ID can be found using `docker ps`. 
 
-Then you can start the simulation yourself by going into the folder `/home/docker/simulation/argos_simulation`
+Then you can start the simulation yourself by going into the folder `/home/docker/drone-rescue/sim/argos_simulation`
 and executing :
 ```
 argos3 -c search_example.argos
