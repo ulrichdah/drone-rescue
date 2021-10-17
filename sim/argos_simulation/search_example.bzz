@@ -118,13 +118,16 @@ function step() {
       if (found_target_info == nil) {
         found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
       }
-      if (found_target_info.found_by == -1) # We should only have one robot that broadcasts the found target
-      {
-        log_metrics(nb_step, STATE_FOUND)
-        found_target_info.found_by = id
-        found_target_info.x = found_gps.x
-        found_target_info.y = found_gps.y
-        virtual_stigmergy.put("found_target_info", found_target_info)
+      if (found_target_info != nil) {
+        if (found_target_info.found_by == -1) { # We should only have one robot that broadcasts the found target
+          log_metrics(nb_step, STATE_FOUND)
+          found_target_info.found_by = id
+          found_target_info.x = found_gps.x
+          found_target_info.y = found_gps.y
+          virtual_stigmergy.put("found_target_info", found_target_info)
+        } else {
+          current_state = STATE_RELAY
+        }
       } else {
         current_state = STATE_RELAY
       }
@@ -146,16 +149,18 @@ function step() {
     # If another robot found a target, go in relay position
     else {
       found_target_info = virtual_stigmergy.get("found_target_info")
-      if (found_target_info == nil) {
-        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
-      }
-      if (found_target_info.found_by != -1)
-      {
-        current_state = STATE_RELAY
+      if (found_target_info != nil) {
+        if (found_target_info.found_by != -1)
+        {
+          current_state = STATE_RELAY
+        } else {
+          current_state = STATE_SEARCH
+        }
       }
       # Else continue searching
       else
       {
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
         next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
         next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
         goto(next_position.x, next_position.y)
