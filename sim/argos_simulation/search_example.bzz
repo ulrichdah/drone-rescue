@@ -115,9 +115,6 @@ function step() {
     debug.print("Found the target")
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
       found_target_info = virtual_stigmergy.get("found_target_info")
-      if (found_target_info == nil) {
-        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
-      }
       if (found_target_info != nil) {
         if (found_target_info.found_by == -1) { # We should only have one robot that broadcasts the found target
           log_metrics(nb_step, STATE_FOUND)
@@ -129,7 +126,7 @@ function step() {
           current_state = STATE_RELAY
         }
       } else {
-        current_state = STATE_RELAY
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
       }
     }
   }
