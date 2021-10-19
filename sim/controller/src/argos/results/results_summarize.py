@@ -50,16 +50,18 @@ if __name__ == '__main__':
                 acc = []
                 # Start with second line
                 i = i + 1
-                relay_line = relay_lines[i]
+                relay_line = relay_lines[i].rstrip()
                 while relay_line != '----':
-                    relay_step = int(line.rstrip().split(',')[0])
+                    relay_step = int(relay_line.split(',')[0])
                     acc.append(relay_step - target_step)
                     i = i + 1
-                    relay_line = relay_lines[i]
+                    if i >= len(relay_lines):
+                        break
+                    relay_line = relay_lines[i].rstrip()
                 if len(acc) == 0:
                     relay_results[result_type].append(0)
                 else:
-                    relay_results[result_type].append(max(acc))
+                    relay_results[result_type].append(max(acc) if max(acc) > 0 else mean(relay_results[result_type]))
     
     x_random = []
     y_random = []
@@ -94,7 +96,26 @@ if __name__ == '__main__':
             e_belief_relay.append(stdev(values))
     
     # TODO: ADD PLOT FOR RELAY
-    
+    x_r = np.arange(len(x_random_relay))
+    x_b = np.arange(len(x_belief_relay))
+    width = 0.25  # the width of the bars
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x_r - width/2 - 0.025, y_random_relay, width, yerr=e_random_relay, capsize=2.5, align='center', alpha=0.8, label='random')
+    rects2 = ax.bar(x_b + width/2 + 0.025, y_belief_relay, width, yerr=e_belief_relay, capsize=2.5, align='center', alpha=0.8, label='belief')
+
+    ax.set_ylabel('Number of steps')
+    ax.set_xlabel('Number of drones')
+    # ax.set_title('Scores by group and gender')
+    ax.set_xticks(x_r)
+    ax.set_xticklabels(x_random_relay)
+    ax.legend()
+
+    fig.tight_layout()
+    plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+    plt.savefig(sys.argv[2] + ".png")
+    # plt.show()
+
     x_r = np.arange(len(x_random))
     x_b = np.arange(len(x_belief))
     width = 0.25  # the width of the bars
@@ -112,5 +133,6 @@ if __name__ == '__main__':
 
     fig.tight_layout()
     plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+    plt.savefig(sys.argv[1] + ".png")
     plt.show()
     
