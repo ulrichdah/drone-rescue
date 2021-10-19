@@ -101,8 +101,8 @@ function step() {
     else { 
       if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
       {
-        # random_belief_search()
-        random_search()
+        random_belief_search()
+        # random_search()
         current_search_step = current_search_step + 1
       } else {
         goto(next_position.x, next_position.y)
