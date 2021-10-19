@@ -17,6 +17,7 @@ class BeliefMap {
             float world_offset_y = - size_y_/2 - 0.5;
             int i = static_cast<int>(std::round(position.GetX() - world_offset_x));
             int j = static_cast<int>(std::round(position.GetY() - world_offset_y));
+            if (i >= size_x_ || j >= size_y_ || i < 0 || j < 0) return 0.0;
             return belief_map_[i][j];
         }
 
