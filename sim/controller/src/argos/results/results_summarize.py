@@ -73,11 +73,11 @@ if __name__ == '__main__':
         if "random" in result_type:
             y_random.append(mean(values))
             x_random.append(int(result_type[1:3]))
-            e_random.append(stdev(values))
+            e_random.append(stdev(values) if stdev(values) < mean(values) else mean(values))
         elif "belief" in result_type:
             y_belief.append(mean(values))
             x_belief.append(int(result_type[1:3]))
-            e_belief.append(stdev(values))
+            e_belief.append(stdev(values) if stdev(values) < mean(values) else mean(values))
     
     x_random_relay = []
     y_random_relay = []
