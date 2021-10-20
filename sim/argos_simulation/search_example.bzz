@@ -4,11 +4,30 @@ include "config/search_example/parameters.bzz"
 include "buzz_includes/search_example/global_variables.bzz"
 include "buzz_includes/debug.bzz"
 
-var virtual_stigmergy
+var target_stigmergy
+var map_stigmergy
+
 var found_gps
 var nb_step = 0
 var waiting_log = 1
 
+
+function init_stigmergies() {
+  target_stigmergy = stigmergy.create(1)
+  if ( id == 0 ) {
+    target_stigmergy.put("found_target_info", found_target_info)
+  }
+  target_stigmergy.onconflict(function(k, l, r){
+    return l
+  })
+  target_stigmergy.onconflictlost(function(k, l){})
+
+  map_stigmergy = stigmergy.create(2)
+  map_stigmergy.onconflict(function(k, l, r){
+    return l
+  })
+  map_stigmergy.onconflictlost(function(k, l){})
+}
 
 # Executed at init time
 function init() {
@@ -25,17 +44,8 @@ function init() {
   # Set initial state
   current_state = STATE_SEARCH
   found_gps = {.x = 0, .y = 0}
-
-  # Set swarm and virtual stigmergy
-  virtual_stigmergy = stigmergy.create(1)
   
-  if ( id == 0 ) {
-    virtual_stigmergy.put("found_target_info", found_target_info)
-  }
-  virtual_stigmergy.onconflict(function(k, l, r){
-      return l
-    })
-  virtual_stigmergy.onconflictlost(function(k, l){})
+  init_stigmergies()
 }
 
 # Check if a target is in sight
@@ -52,12 +62,29 @@ function random_search()
   goto(next_position.x, next_position.y)
 }
 
+function round_to_nearest(value) {
+  if (value > int(value) + 0.5) {
+    return int(value) + 1
+  } else {
+    return int(value)
+  }
+}
+
+function get_best_belief() {
+  next_position_key = string.concat(string.tostring(round_to_nearest(next_position.x)), "_", string.tostring(round_to_nearest(next_position.y)))
+  result = get_belief(next_position.x, next_position.y)
+  if (map_stigmergy.get(next_position_key) != nil) {
+    result = map_stigmergy.get(next_position_key)
+  }
+  return result
+}
+
 # Random belief map search
 function random_belief_search()
 { 
   next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
   next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
-  while (get_belief(next_position.x, next_position.y) < 0.1)
+  while (get_best_belief() < 0.1)
   { 
     next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
     next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
@@ -65,12 +92,26 @@ function random_belief_search()
   goto(next_position.x, next_position.y)
 }
 
+# Log metrics for results
 function log_metrics(step, state) {
   if (state == STATE_FOUND) {
     log_found_target(step, id)
   } else if (state == STATE_RELAY) {
     log_relay(step, id)
   }
+}
+
+# Update the belief based on presence/abscence of the target
+function update_belief(is_present) {
+  current_belief = get_best_belief()
+  new_value = current_belief
+  if (is_present > 0) {
+    new_value = math.min(current_belief * (1 + PROB_DETECTION), 1.0)
+  } else {
+    new_value = math.max(current_belief * (1 - PROB_DETECTION), 0.0)
+  }
+  current_key = get_current_key() # TODO: IMPLEMENT!!!!
+  map_stigmergy.put(current_key, new_value)
 }
 
 # Executed every time step
@@ -85,6 +126,7 @@ function step() {
     debug.print("Searching")
     # Look if a target is discovered
     if ( has_discovered_target() != 0 ) { 
+      update_belief(1)
       found_gps.x = gps_position.x
       found_gps.y = gps_position.y
       goto(MEETING_POINT.x, MEETING_POINT.y)
@@ -96,9 +138,11 @@ function step() {
       goto(MEETING_POINT.x, MEETING_POINT.y)
       current_state = STATE_MEETING
       current_search_step = 0
+      update_belief(0)
     }
     # Else continue searching
     else { 
+      update_belief(0)
       if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
       {
         random_belief_search()
@@ -114,14 +158,14 @@ function step() {
   else if ( current_state == STATE_FOUND ){ 
     debug.print("Found the target")
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
-      found_target_info = virtual_stigmergy.get("found_target_info")
+      found_target_info = target_stigmergy.get("found_target_info")
       if (found_target_info != nil) {
         if (found_target_info.found_by == -1) { # We should only have one robot that broadcasts the found target
           log_metrics(nb_step, STATE_FOUND)
           found_target_info.found_by = id
           found_target_info.x = found_gps.x
           found_target_info.y = found_gps.y
-          virtual_stigmergy.put("found_target_info", found_target_info)
+          target_stigmergy.put("found_target_info", found_target_info)
         } else {
           current_state = STATE_RELAY
         }
@@ -136,16 +180,19 @@ function step() {
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
       # Look for targets when comming back to meeting point
       if ( has_discovered_target() != 0 ) { 
+        update_belief(1)
         found_gps.x = gps_position.x
         found_gps.y = gps_position.y
         goto(MEETING_POINT.x, MEETING_POINT.y)
         current_state = STATE_FOUND
         current_search_step = 0      
-      } 
+      } else {
+        update_belief(0)
+      }
     }
     # If another robot found a target, go in relay position
     else {
-      found_target_info = virtual_stigmergy.get("found_target_info")
+      found_target_info = target_stigmergy.get("found_target_info")
       if (found_target_info != nil) {
         if (found_target_info.found_by != -1)
         {

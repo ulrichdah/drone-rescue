@@ -276,6 +276,18 @@ static int BuzzGetBelief(buzzvm_t vm) {
    return buzzvm_ret1(vm);
 }
 
+static int BuzzGetCurrentKey(buzzvm_t vm) {
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   std::string key_value =
+      reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->GetCurrentKey();
+
+   buzzvm_pushs(vm, buzzvm_string_register(vm, key_value.c_str(), 1));
+
+   return buzzvm_ret1(vm);
+}
+
 static int BuzzLogFoundTarget(buzzvm_t vm) {
    /* Push the vector components */
    buzzvm_lload(vm, 1);
@@ -369,6 +381,10 @@ buzzvm_state CBuzzControllerDroneRescueSim::RegisterFunctions() {
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "get_belief", 1));
    buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzGetBelief));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "get_current_key", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzGetCurrentKey));
    buzzvm_gstore(m_tBuzzVM);
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_found_target", 1));

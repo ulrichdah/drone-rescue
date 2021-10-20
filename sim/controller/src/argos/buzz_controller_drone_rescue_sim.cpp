@@ -89,6 +89,19 @@ int CBuzzControllerDroneRescueSim::DetectTargets() {
    return number_of_blobs;  
 }
 
+/****************************************/
+/****************************************/
+
+std::string CBuzzControllerDroneRescueSim::GetCurrentKey() {
+   int x = static_cast<int>(std::rint(m_pcPos->GetReading().Position.GetX()));
+   int y = static_cast<int>(std::rint(m_pcPos->GetReading().Position.GetY()));
+   std::string key = std::to_string(x) + '_' + std::to_string(y);
+   return key;
+}
+
+/****************************************/
+/****************************************/
+
 void CBuzzControllerDroneRescueSim::LogFoundTarget(const int& step, const int& id){
    
    std::ofstream result_file;
@@ -96,6 +109,9 @@ void CBuzzControllerDroneRescueSim::LogFoundTarget(const int& step, const int& i
 
    result_file << step << "," << id << std::endl;
 }
+
+/****************************************/
+/****************************************/
 
 void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id){
    
