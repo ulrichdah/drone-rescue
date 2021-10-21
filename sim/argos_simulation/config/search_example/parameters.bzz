@@ -3,7 +3,7 @@ SEARCH_SPACE = { .minx = -10.0, .miny = -10.0, .maxx = 10.0, .maxy = 10.0}
 MEETING_POINT = { .x = 0.0, .y = -10.0}
 
 # Searching drones parameters
-NUMBER_OF_ROBOTS = 20
+NUMBER_OF_ROBOTS = 10
 SEARCH_SPEED = 1.0
 NUMBER_OF_SEARCH_STEP = 20
 DELTA_REACHED_POS = 1.0
