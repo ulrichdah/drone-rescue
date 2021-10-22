@@ -72,7 +72,7 @@ function round_to_nearest(value) {
 
 function get_best_belief() {
   next_position_key = string.concat(string.tostring(round_to_nearest(next_position.x)), "_", string.tostring(round_to_nearest(next_position.y)))
-  result = get_belief(next_position.x, next_position.y)
+  var result = get_belief(next_position.x, next_position.y)
   if (map_stigmergy.get(next_position_key) != nil) {
     result = map_stigmergy.get(next_position_key)
   }
@@ -103,8 +103,8 @@ function log_metrics(step, state) {
 
 # Update the belief based on presence/abscence of the target
 function update_belief(is_present) {
-  current_belief = get_best_belief()
-  new_value = current_belief
+  var current_belief = get_best_belief()
+  var new_value = current_belief
   if (is_present > 0) {
     new_value = math.min(current_belief * (1 + PROB_DETECTION), 1.0)
   } else {
