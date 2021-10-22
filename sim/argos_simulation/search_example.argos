@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="20"
+    <experiment length="15"
                 ticks_per_second="5" />
     <!--profiling file="profile.txt"
              format="human_readable"
@@ -80,7 +80,7 @@
     <distribute>
       <position method="uniform" min="-10,-12,0" max="10,-10,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="20" max_trials="100">
+      <entity quantity="15" max_trials="100">
         <spiri id="sp" rab_range="10000" rab_data_size="100000">
           <controller config="drone_controller" />
         </spiri>
