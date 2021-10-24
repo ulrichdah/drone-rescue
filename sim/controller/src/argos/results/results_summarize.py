@@ -163,7 +163,7 @@ def plot(res, ax, title, is_target):
 
     ax.set_ylabel('Number of steps')
     ax.set_xlabel('Number of drones')
-    ax.set_title(title)
+    ax.set_title(title, fontweight='bold')
     ax.set_xticks(x_rand)
     ax.set_xticklabels(res["x_" + plot_type + "_rand"])
     ax.legend()
@@ -179,8 +179,8 @@ if __name__ == '__main__':
     results_3030 = get_target_relay_results("3030")
     results_4040 = get_target_relay_results("4040")
     all = [results_2020, results_3030, results_4040]
-    titles = ["20 x 20", "30 x 30", "40 x 40"]
-    
+    titles = ["(a) 20m x 20m", "(b) 30m x 30m", "(c) 40m x 40m"]
+    plt.rcParams['font.size'] = '8'
     fig_t, (ax1_target, ax2_target, ax3_target) = plt.subplots(1, 3)
     ax_t = [ax1_target, ax2_target, ax3_target]
 
