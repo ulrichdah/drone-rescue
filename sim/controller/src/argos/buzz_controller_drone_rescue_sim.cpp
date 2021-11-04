@@ -10,8 +10,8 @@
 namespace buzz_drone_rescue_sim {
 
 
-const std::string TARGET_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/target_4040_15_belief.txt";
-const std::string RELAY_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/relay_4040_15_belief.txt";
+const std::string TARGET_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/target_4040_10_random.txt";
+const std::string RELAY_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/relay_4040_10_random.txt";
 
 /****************************************/
 /****************************************/
