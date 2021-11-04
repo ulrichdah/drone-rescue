@@ -127,7 +127,7 @@ function step() {
   if (tmp != nil) {
     found_target_info = tmp
     if(found_target_info.found_by != -1 and found_target_info.found_by != id and current_state == STATE_SEARCH) {
-      debug.print(("Found by = ", found_target_info.found_by)
+      debug.print("Found by = ", found_target_info.found_by)
       current_state = STATE_RELAY
     }
   }
