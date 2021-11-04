@@ -8,6 +8,7 @@ SEARCH_SPEED = 1.0
 NUMBER_OF_SEARCH_STEP = 20
 DELTA_REACHED_POS = 1.0
 PROB_DETECTION = 0.9
+SEARCH_TYPE = 0 # 0: random, 1: belief
 
 # Targets parameters
 TARGET_SPEED_MAX = 2.0

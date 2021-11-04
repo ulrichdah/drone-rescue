@@ -70,9 +70,9 @@ function round_to_nearest(value) {
   }
 }
 
-function get_best_belief() {
-  next_position_key = string.concat(string.tostring(round_to_nearest(next_position.x)), "_", string.tostring(round_to_nearest(next_position.y)))
-  var result = get_belief(next_position.x, next_position.y)
+function get_best_belief(x, y) {
+  next_position_key = string.concat(string.tostring(round_to_nearest(x)), "_", string.tostring(round_to_nearest(y)))
+  var result = get_belief(x, y)
   if (map_stigmergy.get(next_position_key) != nil) {
     result = map_stigmergy.get(next_position_key)
   }
@@ -84,7 +84,7 @@ function random_belief_search()
 { 
   next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
   next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
-  while (get_best_belief() < 0.1)
+  while (get_best_belief(next_position.x, next_position.y) < 0.1)
   { 
     next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
     next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
@@ -103,15 +103,17 @@ function log_metrics(step, state) {
 
 # Update the belief based on presence/abscence of the target
 function update_belief(is_present) {
-  var current_belief = get_best_belief()
-  var new_value = current_belief
-  if (is_present > 0) {
-    new_value = math.min(current_belief * (1 + PROB_DETECTION), 1.0)
-  } else {
-    new_value = math.max(current_belief * (1 - PROB_DETECTION), 0.0)
+  if (SEARCH_TYPE == 1) {
+    var current_belief = get_best_belief(gps_position.x, gps_position.y)
+    var new_value = current_belief
+    if (is_present > 0) {
+      new_value = math.min(current_belief * (1 + PROB_DETECTION), 1.0)
+    } else {
+      new_value = math.max(current_belief * (1 - PROB_DETECTION), 0.0)
+    }
+    current_key = get_current_key()
+    map_stigmergy.put(current_key, new_value)
   }
-  current_key = get_current_key() # TODO: IMPLEMENT!!!!
-  map_stigmergy.put(current_key, new_value)
 }
 
 # Executed every time step
@@ -119,7 +121,16 @@ function step() {
   # Update sensors
   update_gps_position()
   nb_step = nb_step + 1
-
+  
+  # If someone found the target and we are in communication range, go to relay
+  var tmp = target_stigmergy.get("found_target_info")
+  if (tmp != nil) {
+    found_target_info = tmp
+    if(found_target_info.found_by != -1 and found_target_info.found_by != id and current_state == STATE_SEARCH) {
+      debug.print(("Found by = ", found_target_info.found_by)
+      current_state = STATE_RELAY
+    }
+  }
   ### State machine ###  
   ## Searching for the target
   if (current_state == STATE_SEARCH){ 
@@ -145,8 +156,11 @@ function step() {
       update_belief(0)
       if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
       {
-        random_belief_search()
-        # random_search()
+        if (SEARCH_TYPE == 1) {
+          random_belief_search()
+        } else {
+          random_search()
+        }
         current_search_step = current_search_step + 1
       } else {
         goto(next_position.x, next_position.y)
