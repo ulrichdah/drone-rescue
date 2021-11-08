@@ -1,0 +1,194 @@
+include "buzz_includes/buzz_utils/vec2.bzz"
+include "config/search_example/parameters.bzz"
+include "buzz_includes/search_example/utils.bzz"
+include "buzz_includes/search_example/belief_search.bzz"
+include "buzz_includes/debug.bzz"
+
+var found_gps
+var nb_step = 0
+var waiting_log = 1
+
+
+function init_stigmergies() {
+  target_stigmergy = stigmergy.create(1)
+  if ( id == 0 ) {
+    target_stigmergy.put("found_target_info", found_target_info)
+  }
+  target_stigmergy.onconflict(function(k, l, r){
+    return l
+  })
+  target_stigmergy.onconflictlost(function(k, l){})
+
+  map_stigmergy = stigmergy.create(2)
+  map_stigmergy.onconflict(function(k, l, r){
+    return l
+  })
+  map_stigmergy.onconflictlost(function(k, l){})
+}
+
+# Executed at init time
+function init() {
+  # Take off command for the Spiri drone model
+  takeoff()
+
+  # Show trajectory for debugging
+  show_colored_trajectory(NUMBER_OF_ROBOTS)
+
+  # Set first search position
+  next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+  next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+
+  # Set initial state
+  current_state = STATE_SEARCH
+  found_gps = {.x = 0, .y = 0}
+  
+  init_stigmergies()
+}
+
+# Check if a target is in sight
+function has_discovered_target()
+{ 
+  return detect_targets()
+}
+
+
+# Executed every time step
+function step() {
+  # Update sensors
+  update_gps_position()
+  nb_step = nb_step + 1
+  
+  # If someone found the target and we are in communication range, go to relay
+  var tmp = target_stigmergy.get("found_target_info")
+  if (tmp != nil) {
+    found_target_info = tmp
+    if(found_target_info.found_by != -1 and found_target_info.found_by != id and current_state == STATE_SEARCH) {
+      debug.print("Found by = ", found_target_info.found_by)
+      current_state = STATE_RELAY
+    }
+  }
+  ### State machine ###  
+  ## Searching for the target
+  if (current_state == STATE_SEARCH){ 
+    debug.print("Searching")
+    # Look if a target is discovered
+    if ( has_discovered_target() != 0 ) { 
+      update_belief(1)
+      found_gps.x = gps_position.x
+      found_gps.y = gps_position.y
+      goto(MEETING_POINT.x, MEETING_POINT.y)
+      current_state = STATE_FOUND
+      current_search_step = 0      
+    } 
+    # If the max number of search step is reached go back to meeting point
+    else if ( current_search_step >= NUMBER_OF_SEARCH_STEP ){ 
+      goto(MEETING_POINT.x, MEETING_POINT.y)
+      current_state = STATE_MEETING
+      current_search_step = 0
+      update_belief(0)
+    }
+    # Else continue searching
+    else { 
+      update_belief(0)
+      if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
+      {
+        if (SEARCH_TYPE == 1) {
+          random_belief_search()
+        } else {
+          random_search()
+        }
+        current_search_step = current_search_step + 1
+      } else {
+        goto(next_position.x, next_position.y)
+      }
+    }
+
+  }
+  # The robot that found the target stays at the meeting point and broacast its info
+  else if ( current_state == STATE_FOUND ){ 
+    debug.print("Found the target")
+    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
+      found_target_info = target_stigmergy.get("found_target_info")
+      if (found_target_info != nil) {
+        if (found_target_info.found_by == -1) { # We should only have one robot that broadcasts the found target
+          log_metrics(nb_step, STATE_FOUND)
+          found_target_info.found_by = id
+          found_target_info.x = found_gps.x
+          found_target_info.y = found_gps.y
+          target_stigmergy.put("found_target_info", found_target_info)
+        } else {
+          current_state = STATE_RELAY
+        }
+      } else {
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
+      }
+    }
+  }
+  # At some point the other robots go the meeting point and see if another robot found something
+  else if ( current_state == STATE_MEETING ){ 
+    debug.print("Periodic meeting")
+    if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
+      # Look for targets when comming back to meeting point
+      if ( has_discovered_target() != 0 ) { 
+        update_belief(1)
+        found_gps.x = gps_position.x
+        found_gps.y = gps_position.y
+        goto(MEETING_POINT.x, MEETING_POINT.y)
+        current_state = STATE_FOUND
+        current_search_step = 0      
+      } else {
+        update_belief(0)
+      }
+    }
+    # If another robot found a target, go in relay position
+    else {
+      found_target_info = target_stigmergy.get("found_target_info")
+      if (found_target_info != nil) {
+        if (found_target_info.found_by != -1)
+        {
+          current_state = STATE_RELAY
+        } else {
+          current_state = STATE_SEARCH
+        }
+      }
+      # Else continue searching
+      else
+      {
+        found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
+        next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+        next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+        goto(next_position.x, next_position.y)
+        current_state = STATE_SEARCH
+      }
+    }
+  }
+  else if ( current_state == STATE_RELAY )
+  {
+    relay_id = id
+    if (relay_id < found_target_info.found_by){
+      relay_id = relay_id + 1
+    }
+    relay_ratio = float(relay_id) / float(NUMBER_OF_ROBOTS-1)
+    relay_x = (found_target_info.x - MEETING_POINT.x ) * relay_ratio + MEETING_POINT.x
+    relay_y = (found_target_info.y - MEETING_POINT.y ) * relay_ratio + MEETING_POINT.y
+    next_position.x = relay_x
+    next_position.y = relay_y
+    goto(next_position.x, next_position.y)
+    if ( has_reached(relay_x, relay_y, DELTA_REACHED_POS) != 0 and waiting_log != 0) {
+      log_metrics(nb_step, STATE_RELAY)
+      waiting_log = 0
+    }
+    if (math.abs(relay_ratio - 1) < 0.01)
+    {
+      debug.print("Follow target")
+    }
+    else
+    {
+      debug.print("Communication relay")
+    }
+  }
+}
+ 
+# Execute at exit
+function destroy() {
+}

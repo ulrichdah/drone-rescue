@@ -121,7 +121,7 @@ RUN cd /home/docker/drone-rescue/sim/controller &&\
 
 # Compile buzz script
 RUN cd /home/docker/drone-rescue/sim/argos_simulation &&\
-    bzzc search_example.bzz &&\
+    bzzc sparse_sar.bzz &&\
     bzzc target_drift_example.bzz
 
 # Put your own git credentials to commit edited code

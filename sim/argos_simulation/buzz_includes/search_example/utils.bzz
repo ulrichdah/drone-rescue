@@ -1,0 +1,26 @@
+
+# Random walk search
+function random_search()
+{ 
+  next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+  next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  goto(next_position.x, next_position.y)
+}
+
+# Round the float value to the nearest integer
+function round_to_nearest(value) {
+  if (value > int(value) + 0.5) {
+    return int(value) + 1
+  } else {
+    return int(value)
+  }
+}
+
+# Log metrics for results
+function log_metrics(step, state) {
+  if (state == STATE_FOUND) {
+    log_found_target(step, id)
+  } else if (state == STATE_RELAY) {
+    log_relay(step, id)
+  }
+}

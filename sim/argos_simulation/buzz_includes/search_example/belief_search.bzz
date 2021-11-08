@@ -1,0 +1,40 @@
+include "buzz_includes/search_example/global_variables.bzz"
+include "buzz_includes/buzz_utils/string.bzz"
+
+function get_best_belief(x, y) {
+  var next_position_key = string.concat(string.tostring(round_to_nearest(x)), "_", string.tostring(round_to_nearest(y)))
+  var result = get_belief(x, y)
+  if (map_stigmergy.get(next_position_key) != nil) {
+    result = map_stigmergy.get(next_position_key)
+  }
+  return result
+}
+
+# Random belief map search
+function random_belief_search()
+{ 
+  next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+  next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  while (get_best_belief(next_position.x, next_position.y) < 0.1)
+  { 
+    next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
+    next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+  }
+  goto(next_position.x, next_position.y)
+}
+
+
+# Update the belief based on presence/abscence of the target
+function update_belief(is_present) {
+  if (SEARCH_TYPE == 1) {
+    var current_belief = get_best_belief(gps_position.x, gps_position.y)
+    var new_value = current_belief
+    if (is_present > 0) {
+      new_value = math.min(current_belief * (1 + PROB_DETECTION), 1.0)
+    } else {
+      new_value = math.max(current_belief * (1 - PROB_DETECTION), 0.0)
+    }
+    current_key = get_current_key()
+    map_stigmergy.put(current_key, new_value)
+  }
+}

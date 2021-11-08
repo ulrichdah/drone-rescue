@@ -35,7 +35,7 @@ If you have multiple containers running at the same time, you can replace the `$
 Then you can start the simulation yourself by going into the folder `/home/docker/drone-rescue/sim/argos_simulation`
 and executing :
 ```
-argos3 -c search_example.argos
+argos3 -c sparse_sar.argos
 ```
 
 # To debug with Visual Studio Code

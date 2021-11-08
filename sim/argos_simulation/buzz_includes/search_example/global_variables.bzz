@@ -4,6 +4,8 @@ var next_position = { .x = 0.0, .y = 0.0 }
 var current_state = STATE_SEARCH
 var found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
 var number_of_targets_in_sight = 0
+var target_stigmergy
+var map_stigmergy
 
 # State machine
 STATE_SEARCH = 0
