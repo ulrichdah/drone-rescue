@@ -8,6 +8,9 @@ var found_gps
 var nb_step = 0
 var waiting_log = 1
 
+var position_bid 
+var current_best = {.value = 0, .best_id = -1}
+
 
 function init_stigmergies() {
   target_stigmergy = stigmergy.create(1)
@@ -24,6 +27,17 @@ function init_stigmergies() {
     return l
   })
   map_stigmergy.onconflictlost(function(k, l){})
+}
+
+function init_listeners() {
+  neighbors.listen("networkers_need", function(vid, value, rid) {
+    if (current_state == STATE_SEARCH or current_state == STATE_MEETING) {
+      # get position for the bid
+      position_bid = value
+      log("POSTION FOR BID", position_bid)
+      current_state = STATE_NETWORKER_BIDDING
+    }
+  })
 }
 
 # Executed at init time
@@ -43,6 +57,7 @@ function init() {
   found_gps = {.x = 0, .y = 0}
   
   init_stigmergies()
+  init_listeners()
 }
 
 # Check if a target is in sight
@@ -51,25 +66,36 @@ function has_discovered_target()
   return detect_targets()
 }
 
+function safe_stigmergy_get(v_stigmergy, key, default) {
+  var tmp = v_stigmergy.get(key)
+  if (tmp != nil) {
+    return tmp
+  } else {
+    return default
+  }
+}
+
 function check_new_target() {
   var tmp = target_stigmergy.get("found_target_info")
   if (tmp != nil) {
     found_target_info = tmp
     if(found_target_info.found_by != -1 and found_target_info.found_by != id and current_state == STATE_SEARCH) {
       debug.print("Found by = ", found_target_info.found_by)
-      current_state = STATE_RELAY
+      current_state = STATE_NETWORKER
     }
   }
 }
 
 function search_state() {
   debug.print("Searching")
+  # Check if need for networker
+    # return
   # Look if a target is discovered
   if ( has_discovered_target() != 0 ) { 
     update_belief(1)
     found_gps.x = gps_position.x
     found_gps.y = gps_position.y
-    goto(MEETING_POINT.x, MEETING_POINT.y)
+    # goto(MEETING_POINT.x, MEETING_POINT.y)
     current_state = STATE_FOUND
     current_search_step = 0      
   } 
@@ -99,6 +125,15 @@ function search_state() {
 
 function found_state() {
   debug.print("Found the target")
+  # If the target is known to him:
+    # GO back searching
+  # Else
+    # Go to rally point 
+    # If reached 
+      # If root:
+        # Broadcast found target
+      # else:
+        # state =  ROOT_STATE
   if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) != 0 and found_target_info.found_by != id) {
     found_target_info = target_stigmergy.get("found_target_info")
     if (found_target_info != nil) {
@@ -109,7 +144,7 @@ function found_state() {
         found_target_info.y = found_gps.y
         target_stigmergy.put("found_target_info", found_target_info)
       } else {
-        current_state = STATE_RELAY
+        current_state = STATE_NETWORKER
       }
     } else {
       found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
@@ -118,7 +153,26 @@ function found_state() {
 }
 
 function root_state() {
+  # Listen to broadcast for new_target
+  neighbors.listen("new_target", function(vid, value, rid) {
+    # get position of new target
+    var new_candidate = value
+    # if the new target was not already found
+      # Add it to targets stack
+  })
 
+  # Listen to networker bid
+  neighbors.listen("bid_value", function(vid, value, rid) {
+    # get bid value
+    if (current_best.value < value) {
+      current_best.value = value
+      current_best.best_id = rid
+    }
+  })
+  # Create stack points for Networkers
+  # If unassigned position in stack
+    # Broadcast networker_needed with position
+  # Broadcast winner after a 10 steps
 }
 
 function meeting_state() {
@@ -129,41 +183,40 @@ function meeting_state() {
       update_belief(1)
       found_gps.x = gps_position.x
       found_gps.y = gps_position.y
-      goto(MEETING_POINT.x, MEETING_POINT.y)
+      # goto(MEETING_POINT.x, MEETING_POINT.y)
       current_state = STATE_FOUND
       current_search_step = 0      
     } else {
       update_belief(0)
     }
   }
-  # If another robot found a target, go in relay position
+  # When we get to the meeting point go back to searching when no networkers are needed
   else {
-    found_target_info = target_stigmergy.get("found_target_info")
-    if (found_target_info != nil) {
-      if (found_target_info.found_by != -1)
-      {
-        current_state = STATE_RELAY
-      } else {
-        current_state = STATE_SEARCH
-      }
-    }
-    # Else continue searching
-    else
-    {
-      found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
-      next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
-      next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
-      goto(next_position.x, next_position.y)
-      current_state = STATE_SEARCH
-    }
+    found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
+    next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+    next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+    goto(next_position.x, next_position.y)
+    current_state = STATE_SEARCH
   }
 }
 
 function networker_bidding_state() {
-
+  # Listen to winner 
+  neighbors.listen("bid_winner", function(vid, winner_id, rid) {
+    if (winner_id == id) {
+      current_state = STATE_NETWORKER
+    } else {
+      current_state = STATE_SEARCH
+    }
+    # TODO: Check if it actually ignore or if it should be done somewhere else
+    neighbors.ignore("bid_winner")
+  })
+  # Calculate distance from the position
+  # Broadcast your bid
 }
 
 function networker_state() {
+  # Goto(position)
   relay_id = id
   if (relay_id < found_target_info.found_by){
     relay_id = relay_id + 1
@@ -175,7 +228,7 @@ function networker_state() {
   next_position.y = relay_y
   goto(next_position.x, next_position.y)
   if ( has_reached(relay_x, relay_y, DELTA_REACHED_POS) != 0 and waiting_log != 0) {
-    log_metrics(nb_step, STATE_RELAY)
+    log_metrics(nb_step, STATE_NETWORKER)
     waiting_log = 0
   }
   if (math.abs(relay_ratio - 1) < 0.01)
@@ -204,7 +257,7 @@ function step() {
   else if ( current_state == STATE_MEETING ){ 
     meeting_state()
   }
-  else if ( current_state == STATE_RELAY )
+  else if ( current_state == STATE_NETWORKER )
   {
     networker_state()
   }

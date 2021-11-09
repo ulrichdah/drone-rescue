@@ -107,8 +107,8 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization/>
-  <!-- <visualization>
+  <!-- <visualization/> -->
+  <visualization>
     <qt-opengl>
       <camera>
         <placement idx="0" position="0,0,100" look_at="0,0,0" up="-1,0,0" lens_focal_length="134" />
@@ -119,6 +119,6 @@
                        quality="100" /> 
       <user_functions label="buzz_qt" show_buzz_editor="false"/>
     </qt-opengl>
-  </visualization> -->
+  </visualization>
 
 </argos-configuration>
