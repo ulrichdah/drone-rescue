@@ -8,13 +8,15 @@ var found_gps
 var nb_step = 0
 var waiting_log = 1
 
-var current_bid_position = nil
-var current_target = nil
-var networkers_positions = nil
+var current_bid_position = {}
+var current_target = {}
+var networkers_positions = {}
+
 var graph = {}
 var count_broadcast = 0
+var count_broadcast_winner = 0
 var cur_bid_id = 0
-var current_best_bid = {.value = 0.0, .rid = -1}
+var current_best_bid = {.value = -1.0, .rid = -1}
 
 
 function init_stigmergies() {
@@ -84,7 +86,7 @@ function is_new_target(target_position) {
   for (i = 0, i < size(found_targets), i = i + 1) {
     var existing_target_pos = found_targets[i].position
     var difference = distance_v2(existing_target_pos, target_position) 
-    if (difference <= DELTA_REACHED_POS) {
+    if (difference <= 3.0) {
       return 0
     }
   }
@@ -105,7 +107,7 @@ function get_nearest_vertex(target_position) {
 }
 
 # Returns a list of networkers positions for a given target
-function get_networkers_positions(target_postion) {
+function get_networkers_positions(target_position) {
   var start = get_nearest_vertex(target_position)
   var distance = math.vec2.length(math.vec2.sub(target_position, start))
   var unit_direction = math.vec2.norm(math.vec2.sub(target_position, start))
@@ -113,13 +115,16 @@ function get_networkers_positions(target_postion) {
   if (distance % COMMUNICATION_RANGE != 0) {
     nb_networkers = nb_networkers + 1
   }
-
+  log("Nb networker:", nb_networkers)
   var positions = {}
   for (i = 0, i < nb_networkers - 1, i = i + 1) {
-    var new_pos = {.x = unit_direction.x * COMMUNICATION_RANGE * i, .y = unit_direction.y * COMMUNICATION_RANGE * i}
-    positions[i] = new_pos
+    var new_pos = {.x = unit_direction.x * COMMUNICATION_RANGE * (i +1), .y = unit_direction.y * COMMUNICATION_RANGE * (i + 1)}
+    positions[i] = math.vec2.add(start, new_pos)
+    graph[size(graph)] = positions[i]
+    log("Networker", i, ":", positions[i].x, ", ", positions[i].y)
   }
-  positions[nb_networkers - 1] = target_position
+  positions[(nb_networkers - 1)] = target_position
+  graph[size(graph)] = target_position
   return positions
 }
 
@@ -142,7 +147,7 @@ function search_state() {
   debug.print("Searching")
   # Look if a target is discovered
   if ( has_discovered_target() != 0 ) { 
-    update_belief(1)
+    update_belief(0)
     found_gps.x = gps_position.x
     found_gps.y = gps_position.y
     current_state = STATE_FOUND
@@ -179,6 +184,11 @@ function found_state() {
   neighbors.listen("ack_new_target", function(vid, value, rid) {
     if (value == id) {
       current_state = STATE_SEARCH
+      if (SEARCH_TYPE == 1) {
+        random_belief_search()
+      } else {
+        random_search()
+      }
     }
   })
 
@@ -200,6 +210,11 @@ function found_state() {
     neighbors.broadcast("new_target", found_gps)
   } else {
     current_state = STATE_SEARCH
+    if (SEARCH_TYPE == 1) {
+      random_belief_search()
+    } else {
+      random_search()
+    }
   }
 }
 
@@ -226,10 +241,16 @@ function root_state() {
       current_best_bid.rid = rid
     }
   })
+  log("Number target = ", size(found_targets))
 
   var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
   if (root_id != id) {
     current_state =  STATE_SEARCH
+    if (SEARCH_TYPE == 1) {
+      random_belief_search()
+    } else {
+      random_search()
+    }
     neighbors.broadcast("new_target", found_gps)
     neighbors.ignore("new_target")
     neighbors.ignore("bid_value")
@@ -238,7 +259,8 @@ function root_state() {
   }
 
   # Process next target
-  if (current_target == nil) {
+  if (size(current_target) == 0) {
+    log("NO CURRENT TARGET")
     var i = 0
     var continue = 1
     while(i < size(found_targets) and continue == 1) {
@@ -252,19 +274,21 @@ function root_state() {
   }
 
   # Create stack points for Networkers
-  if (current_target != nil) {
-    if (networkers_positions == nil) {
+  if (size(current_target) != 0) {
+    log("CURRENT TARG: ", current_target.x, ", ", current_target.y)
+    if (size(networkers_positions) == 0) {
+      log("NO NETWORKERS LIST")
       networkers_positions = get_networkers_positions(current_target)
     }
 
     # If unassigned position in stack
-    if (current_bid_position == nil) {
+    if (size(current_bid_position) == 0) {
       var i = 0
       var continue = 1
       while(i < size(networkers_positions) and continue == 1) {
         if (networkers_positions[i] != nil) {
           current_bid_position = networkers_positions[i]
-          current_best_bid = {.value = 0.0, .rid = -1}
+          current_best_bid = {.value = -1.0, .rid = -1}
           networkers_positions[i] = nil
           continue = 0
         }
@@ -272,20 +296,30 @@ function root_state() {
       }
       # No more positions for this target
       if (continue == 1) {
-        current_target = nil
+        log("Processed")
+        current_target = {}
+        return
       }
     }
-    if (current_bid_position == nil) {
-      return
-    }
-    # Broadcast networker_needed with position
-    if (count_broadcast < 10) {
-      neighbors.broadcast("networkers_need", {.id_bid = cur_bid_id, .position = current_bid_position})
-      count_broadcast = count_broadcast + 1
-    } else {
-      # Broadcast winner after a 10 steps
+    current_state = STATE_AUCTIONEER 
+  }
+}
+
+function auctionner_state() {
+  debug.print("Auctioneer")
+  # Broadcast networker_needed with position
+  if (count_broadcast < 10 or current_best_bid.rid == -1) {
+    neighbors.broadcast("networkers_need", {.id_bid = cur_bid_id, .position = current_bid_position})
+    count_broadcast = count_broadcast + 1
+  } else { # Broadcast winner after a 10 steps
+    if (count_broadcast_winner < 5) {
       neighbors.broadcast("bid_winner", current_best_bid.rid)
-      current_bid_position = nil
+      count_broadcast_winner = count_broadcast_winner + 1
+    } else {
+      current_state = STATE_ROOT
+      log("---- Back from auction ----")
+      current_bid_position = {}
+      count_broadcast_winner = 0
       count_broadcast = 0
     }
   }
@@ -294,11 +328,10 @@ function root_state() {
 function meeting_state() {
   debug.print("Periodic meeting")
   # Update local list of targets
-  found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
     # Look for targets when comming back to meeting point
     if ( has_discovered_target() != 0 ) { 
-      update_belief(1)
+      update_belief(0)
       found_gps.x = gps_position.x
       found_gps.y = gps_position.y
       current_state = STATE_FOUND
@@ -325,7 +358,12 @@ function networker_bidding_state() {
       current_state = STATE_NETWORKER
     } else {
       current_state = STATE_SEARCH
-      current_bid_position = nil
+      if (SEARCH_TYPE == 1) {
+        random_belief_search()
+      } else {
+        random_search()
+      }
+      current_bid_position = {}
     }
     # TODO: Check if it actually ignore or if it should be done somewhere else
     neighbors.ignore("bid_winner")
@@ -336,7 +374,7 @@ function networker_bidding_state() {
 }
 
 function networker_state() {
-  debug.print("Networker")
+  debug.print("Networker", current_bid_position.x, current_bid_position.y)
   goto(current_bid_position.x, current_bid_position.y)
 }
 
@@ -344,6 +382,8 @@ function networker_state() {
 function step() {
   update_gps_position()
   nb_step = nb_step + 1
+  
+  found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   
   if (current_state == STATE_SEARCH) { 
     search_state()
@@ -357,6 +397,8 @@ function step() {
     networker_bidding_state()
   } else if (current_state == STATE_NETWORKER) {
     networker_state()
+  } else if (current_state == STATE_AUCTIONEER) {
+    auctionner_state()
   }
 }
  
