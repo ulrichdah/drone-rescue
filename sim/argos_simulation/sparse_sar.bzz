@@ -18,6 +18,8 @@ var count_broadcast = 0
 var count_broadcast_winner = 0
 var cur_bid_id = 0
 var current_best_bid = {.value = -1.0, .rid = -1}
+var winners_acks = {}
+var state_duration = 0
 
 
 function init_stigmergies() {
@@ -40,7 +42,7 @@ function init_stigmergies() {
 }
 
 function init_listeners() {
-  neighbors.listen("networkers_need", function(vid, value, rid) {
+  neighbors.listen(NETWORKERS_NEEDED_EVENT, function(vid, value, rid) {
     if (current_state == STATE_SEARCH or current_state == STATE_MEETING) {
       # get position for the bid
       current_bid_position = value.position
@@ -68,6 +70,15 @@ function init() {
   
   init_stigmergies()
   init_listeners()
+}
+
+# Sample new position for search depending on the search algorithm
+function search() {
+  if (SEARCH_TYPE == 1) {
+    random_belief_search()
+  } else {
+    random_search()
+  }
 }
 
 # Check if a target is in sight
@@ -167,11 +178,7 @@ function search_state() {
     update_belief(0)
     if ( has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) != 0 )
     {
-      if (SEARCH_TYPE == 1) {
-        random_belief_search()
-      } else {
-        random_search()
-      }
+      search()
       current_search_step = current_search_step + 1
     } else {
       goto(next_position.x, next_position.y)
@@ -183,19 +190,16 @@ function found_state() {
   debug.print("Found the target")
 
   # Wait for ack from root if exists before leaving this state
-  neighbors.listen("ack_new_target", function(vid, value, rid) {
+  neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
     if (value == id) {
-      neighbors.ignore("ack_new_target")
+      neighbors.ignore(NEW_TARGET_ACK_EVENT)
       current_state = STATE_SEARCH
-      if (SEARCH_TYPE == 1) {
-        random_belief_search()
-      } else {
-        random_search()
-      }
+      search()
     }
   })
 
   if (is_new_target(found_gps) != 0) {
+    log("[", id, "] New target")
     var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
     # Go to meeting zone if not there already
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0) {
@@ -210,24 +214,20 @@ function found_state() {
       target_stigmergy.put("found_targets", found_targets)
       return
     }
-    neighbors.broadcast("new_target", found_gps)
+    neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
   } else {
     current_state = STATE_SEARCH
-    if (SEARCH_TYPE == 1) {
-      random_belief_search()
-    } else {
-      random_search()
-    }
+    search()
   }
 }
 
 function root_state() {
   debug.print("ROOT")
 
-  neighbors.ignore("networkers_need")
+  neighbors.ignore(NETWORKERS_NEEDED_EVENT)
   # Listen to broadcast for new_target
-  neighbors.listen("new_target", function(vid, new_target_position, rid) {
-    neighbors.broadcast("ack_new_target", rid)
+  neighbors.listen(NEW_TARGET_EVENT, function(vid, new_target_position, rid) {
+    neighbors.broadcast(NEW_TARGET_ACK_EVENT, rid)
     var new_candidate = new_target_position
     if(is_new_target(new_candidate)) {
       # Add it to targets stack and update stigmergy
@@ -241,14 +241,10 @@ function root_state() {
   var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
   if (root_id != id) {
     current_state =  STATE_SEARCH
-    if (SEARCH_TYPE == 1) {
-      random_belief_search()
-    } else {
-      random_search()
-    }
-    neighbors.broadcast("new_target", found_gps)
-    neighbors.ignore("new_target")
-    neighbors.ignore("bid_value")
+    search()
+    neighbors.ignore(NEW_TARGET_EVENT)
+    neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
+    neighbors.ignore(BIDDING_VALUE_EVENT)
     init_listeners()
     return
   }
@@ -307,31 +303,58 @@ function root_state() {
 function auctionner_state() {
   debug.print("Auctioneer")
   # Listen to networker bid
-  neighbors.listen("bid_value", function(vid, info_bid, rid) {
+  neighbors.listen(BIDDING_VALUE_EVENT, function(vid, info_bid, rid) {
     # get bid value
     if (current_best_bid.value < info_bid.value and info_bid.id_bid == cur_bid_id) {
       current_best_bid.value = info_bid.value
       current_best_bid.rid = rid
     }
   })
+  # Listen to winner acknowledgment
+  neighbors.listen(WINNER_ACK_EVENT, function(vid, winner_id, rid) {
+    # get bid value
+    if (current_best_bid.rid == winner_id) {
+    log("[", id, "] Winner ACK", winner_id, "Cur_bid", current_best_bid.rid)
+      winners_acks[cur_bid_id] = winner_id
+      if (current_state == STATE_AUCTIONEER) {
+        current_state = STATE_ROOT
+        log("---- Back from auction ----")
+        current_bid_position = {}
+        count_broadcast_winner = 0
+        count_broadcast = 0
+        neighbors.ignore(WINNER_ACK_EVENT)
+      }
+    }
+  })
+
+  var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
+  if (root_id != id) {
+    current_state =  STATE_ROOT
+    return
+  }
 
   # Broadcast networker_needed with position
-  if (count_broadcast < 10 or current_best_bid.rid == -1) {
-    neighbors.broadcast("networkers_need", {.id_bid = cur_bid_id, .position = current_bid_position})
+  if (count_broadcast < MAX_BROADCAST_STEP or current_best_bid.rid == -1) {
+    neighbors.broadcast(NETWORKERS_NEEDED_EVENT, {.id_bid = cur_bid_id, .position = current_bid_position})
     count_broadcast = count_broadcast + 1
   } else { # Broadcast winner after a 10 steps
-    neighbors.ignore("bid_value")
-    if (count_broadcast_winner < 5 ) {
-      neighbors.broadcast("bid_winner", current_best_bid.rid)
+    neighbors.ignore(BIDDING_VALUE_EVENT)
+    if (count_broadcast_winner < MAX_BROADCAST_STEP) {
+      neighbors.broadcast(BID_WINNER_EVENT, current_best_bid.rid)
       log(" Winner is: ", current_best_bid.rid)
       count_broadcast_winner = count_broadcast_winner + 1
     } else {
-      current_state = STATE_ROOT
-      log("---- Back from auction ----")
-      current_bid_position = {}
+      log("COntinue bidding")
       count_broadcast_winner = 0
       count_broadcast = 0
-    }
+      current_best_bid = {.value = -1.0, .rid = -1}
+    } #else {
+    #   current_state = STATE_ROOT
+    #   log("---- Back from auction ----")
+    #   current_bid_position = {}
+    #   count_broadcast_winner = 0
+    #   count_broadcast = 0
+    # }
   }
 }
 
@@ -363,20 +386,17 @@ function meeting_state() {
 function networker_bidding_state() {
   debug.print("Networker bidding")
   # Listen to winner 
-  neighbors.listen("bid_winner", function(vid, winner_id, rid) {
+  neighbors.listen(BID_WINNER_EVENT, function(vid, winner_id, rid) {
     if (winner_id == id) {
+      state_duration = 0
       current_state = STATE_NETWORKER
-      neighbors.ignore("networkers_need")
+      neighbors.ignore(NETWORKERS_NEEDED_EVENT)
     } else {
       current_state = STATE_SEARCH
-      if (SEARCH_TYPE == 1) {
-        random_belief_search()
-      } else {
-        random_search()
-      }
+      search()
       current_bid_position = {}
     }
-    neighbors.ignore("bid_winner")
+    neighbors.ignore(BID_WINNER_EVENT)
   })
   if (has_reached(next_position.x, next_position.y, DELTA_REACHED_POS) == 0) {
     return
@@ -386,20 +406,30 @@ function networker_bidding_state() {
   # if (distance_v2( {.x = 0.0, .y = -10.0}, gps_position) > COMMUNICATION_RANGE) {
   if (distance_v2(math.vec2.new(MEETING_POINT.x, MEETING_POINT.y) , gps_position) > COMMUNICATION_RANGE) {
     current_state = STATE_SEARCH
-    if (SEARCH_TYPE == 1) {
-      random_belief_search()
-    } else {
-      random_search()
-    }
+    search()
     return
   }
-  var r_bid = get_bid(current_bid_position)
-  neighbors.broadcast("bid_value", {.id_bid = cur_bid_id, .value = r_bid})
+  if (state_duration < 20) {
+    var r_bid = get_bid(current_bid_position)
+    log("[", id, "] Bidding: ", cur_bid_id)
+    neighbors.broadcast(BIDDING_VALUE_EVENT, {.id_bid = cur_bid_id, .value = r_bid})
+    state_duration = state_duration + 1
+  } else {
+    state_duration = 0
+    current_state = STATE_SEARCH
+    search()
+    current_bid_position = {}
+  }
 }
 
 function networker_state() {
   debug.print("Networker", current_bid_position.x, current_bid_position.y)
-  goto(current_bid_position.x, current_bid_position.y)
+  if (state_duration < 5) {
+    neighbors.broadcast(WINNER_ACK_EVENT, id)
+    state_duration = state_duration + 1
+  } else {
+    goto(current_bid_position.x, current_bid_position.y)
+  }
 }
 
 # Executed every time step

@@ -16,3 +16,11 @@ STATE_NETWORKER = 3
 STATE_ROOT = 4
 STATE_NETWORKER_BIDDING = 5
 STATE_AUCTIONEER = 6
+
+# Events
+NETWORKERS_NEEDED_EVENT = "networkers_need"
+NEW_TARGET_EVENT = "new_target"
+NEW_TARGET_ACK_EVENT = "ack_new_target"
+BIDDING_VALUE_EVENT = "bid_value"
+WINNER_ACK_EVENT = "winner_ack"
+BID_WINNER_EVENT = "bid_winner"
