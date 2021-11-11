@@ -312,7 +312,6 @@ function auctionner_state() {
   })
   # Listen to winner acknowledgment
   neighbors.listen(WINNER_ACK_EVENT, function(vid, winner_id, rid) {
-    # get bid value
     if (current_best_bid.rid == winner_id) {
     log("[", id, "] Winner ACK", winner_id, "Cur_bid", current_best_bid.rid)
       winners_acks[cur_bid_id] = winner_id
@@ -348,13 +347,7 @@ function auctionner_state() {
       count_broadcast_winner = 0
       count_broadcast = 0
       current_best_bid = {.value = -1.0, .rid = -1}
-    } #else {
-    #   current_state = STATE_ROOT
-    #   log("---- Back from auction ----")
-    #   current_bid_position = {}
-    #   count_broadcast_winner = 0
-    #   count_broadcast = 0
-    # }
+    }
   }
 }
 
