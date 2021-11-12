@@ -12,7 +12,6 @@ var current_target = {}
 var networkers_positions = {}
 var initial_nb_networkers = -1
 
-var graph = {}
 var count_broadcast = 0
 var count_broadcast_winner = 0
 var current_best_bid = {.value = -1.0, .rid = -1}
@@ -79,86 +78,17 @@ function search() {
   }
 }
 
-# Check if a target is in sight
-function has_discovered_target()
-{ 
-  return detect_targets()
-}
-
-# Returns difference between two vec2
-function distance_v2(v1, v2) {
-  return math.vec2.length(math.vec2.sub(v1, v2))   
-}
-
-# Check if given target position was already found
-function is_new_target(target_position) {
-  for (i = 0, i < size(found_targets), i = i + 1) {
-    var existing_target_pos = found_targets[i].position
-    var difference = distance_v2(existing_target_pos, target_position) 
-    if (difference <= 5.0) {
-      return 0
-    }
-  }
-  return 1
-}
-
-# Check if a target was already processed (at least one existing relay)
-function get_nearest_vertex(target_position) {
-  var nearest_vertex = math.vec2.new(MEETING_POINT.x, MEETING_POINT.y) 
-  var nearest_distance = distance_v2(nearest_vertex, target_position)
-  for (i = 0, i < size(graph), i = i + 1) {
-    if (distance_v2(graph[i], target_position) < nearest_distance) {
-      nearest_vertex = graph[i]
-      nearest_distance = distance_v2(graph[i], target_position)
-    }
-  }
-  return nearest_vertex
-}
-
-# Returns a list of networkers positions for a given target
-function get_networkers_positions(target_position) {
-  var start = get_nearest_vertex(target_position)
-  var distance = math.vec2.length(math.vec2.sub(target_position, start))
-  var unit_direction = math.vec2.norm(math.vec2.sub(target_position, start))
-  var nb_networkers = int(distance / COMMUNICATION_RANGE)
-  if (distance % COMMUNICATION_RANGE != 0) {
-    nb_networkers = nb_networkers + 1
-  }
-  log("Nb networker:", nb_networkers)
-  var positions = {}
-  for (i = 0, i < nb_networkers - 1, i = i + 1) {
-    var new_pos = {.x = unit_direction.x * COMMUNICATION_RANGE * (i +1), .y = unit_direction.y * COMMUNICATION_RANGE * (i + 1)}
-    positions[i] = math.vec2.add(start, new_pos)
-    graph[size(graph)] = positions[i]
-    log("Networker", i, ":", positions[i].x, ", ", positions[i].y)
-  }
-  positions[(nb_networkers - 1)] = target_position
-  log("Networker", (nb_networkers - 1), ":", positions[(nb_networkers - 1)].x, ", ", positions[(nb_networkers - 1)].y)
-  graph[size(graph)] = target_position
-  return positions
-}
-
-# Returns a bid value based on the distance from the given position
-function get_bid(position) {
-  var distance = distance_v2(position, gps_position)
-  return 1 / distance
-}
-
-function safe_stigmergy_get(v_stigmergy, key, default) {
-  var tmp = v_stigmergy.get(key)
-  if (tmp != nil) {
-    return tmp
-  } else {
-    return default
-  }
-}
-
 function move_to_found_state() {
   update_belief(0)
   found_gps.x = gps_position.x
   found_gps.y = gps_position.y
   current_search_step = 0  
   current_state = STATE_FOUND
+}
+
+function move_to_search_state() {
+  search()
+  current_state = STATE_SEARCH
 }
 
 function search_state() {
@@ -195,8 +125,7 @@ function found_state() {
   neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
     if (value == id) {
       neighbors.ignore(NEW_TARGET_ACK_EVENT)
-      current_state = STATE_SEARCH
-      search()
+      move_to_search_state()
     }
   })
 
@@ -218,8 +147,7 @@ function found_state() {
     }
     neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
   } else {
-    current_state = STATE_SEARCH
-    search()
+    move_to_search_state()
   }
 }
 
@@ -346,7 +274,7 @@ function auctionner_state() {
       log(" Winner is: ", current_best_bid.rid)
       count_broadcast_winner = count_broadcast_winner + 1
     } else {
-      log("COntinue bidding")
+      log("Continue bidding")
       cur_bid_info.id_bid = cur_bid_info.id_bid + 1
       count_broadcast_winner = 0
       count_broadcast = 0
@@ -368,8 +296,7 @@ function meeting_state() {
   }
   # When we get to the meeting point go back to searching when no networkers are needed
   else {
-    search()
-    current_state = STATE_SEARCH
+    move_to_search_state()
   }
 }
 
@@ -382,8 +309,7 @@ function networker_bidding_state() {
       current_state = STATE_NETWORKER
       neighbors.ignore(NETWORKERS_NEEDED_EVENT)
     } else if (cur_bid_info.last == 0) {
-      current_state = STATE_SEARCH
-      search()
+      move_to_search_state()
       cur_bid_info.position = {}
     } else {
       current_state = STATE_WAIT_FOR_BID
@@ -395,22 +321,19 @@ function networker_bidding_state() {
     return
   }
   
-  # For some reason, using MEETING_POINT instead of a magic value return ~0
-  # if (distance_v2( {.x = 0.0, .y = -10.0}, gps_position) > COMMUNICATION_RANGE) {
   if (distance_v2(math.vec2.new(MEETING_POINT.x, MEETING_POINT.y) , gps_position) > COMMUNICATION_RANGE) {
-    current_state = STATE_SEARCH
-    search()
+    move_to_search_state()
     neighbors.ignore(BID_WINNER_EVENT)
     return
   }
+
   if (state_duration < 30) {
     var r_bid = get_bid(cur_bid_info.position)
     neighbors.broadcast(BIDDING_VALUE_EVENT, {.id_bid = cur_bid_info.id_bid, .value = r_bid})
     state_duration = state_duration + 1
   } else {
     state_duration = 0
-    current_state = STATE_SEARCH
-    search()
+    move_to_search_state()
     cur_bid_info.position = {}
     neighbors.ignore(BID_WINNER_EVENT)
   }
@@ -419,8 +342,7 @@ function networker_bidding_state() {
 function wait_for_bid_state() {
   debug.print("Waiting for bid")
   if (state_duration > 10) {
-    current_state = STATE_SEARCH
-    search()
+    move_to_search_state()
     state_duration = 0
   } else {
     state_duration = state_duration + 1
