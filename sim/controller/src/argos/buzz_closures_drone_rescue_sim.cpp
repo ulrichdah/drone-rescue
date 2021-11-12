@@ -348,6 +348,17 @@ static int BuzzLogRelay(buzzvm_t vm) {
    return buzzvm_ret0(vm);
 }
 
+static int BuzzExperimentDone(buzzvm_t vm) {
+
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->experiment_done = true;
+
+   return buzzvm_ret0(vm);
+}
+
 /****************************************/
 /************ Registration **************/
 /****************************************/
@@ -393,6 +404,10 @@ buzzvm_state CBuzzControllerDroneRescueSim::RegisterFunctions() {
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_relay", 1));
    buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzLogRelay));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "experiment_done", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzExperimentDone));
    buzzvm_gstore(m_tBuzzVM);
 
    return m_tBuzzVM->state;

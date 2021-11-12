@@ -1,5 +1,5 @@
 #include <argos3/core/simulator/loop_functions.h>
-#include <argos3/plugins/robots/spiri/simulator/spiri_entity.h
+#include <argos3/plugins/robots/spiri/simulator/spiri_entity.h>
 namespace argos {
 
 class MapLoopFunctions : public CLoopFunctions {

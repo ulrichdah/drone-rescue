@@ -1,6 +1,5 @@
 #include "map_loop_functions.h"
-#include "buzz_controller_drone_rescue_sim.h"
-#include "belief_map.h"
+#include "../buzz_controller_drone_rescue_sim.h"
 #include <argos3/plugins/simulator/entities/box_entity.h>
 #include <iostream>
 #include <stdlib.h> 
@@ -46,7 +45,7 @@ bool MapLoopFunctions::IsExperimentFinished() {
    int nbSpiri = spiriMap.size();
 
    std::vector<CSpiriEntity*> m_pcESpiri (nbSpiri);
-   std::vector<CBuzzControllerDroneRescueSim*> m_pcControllers (nbSpiri);
+   std::vector<buzz_drone_rescue_sim::CBuzzControllerDroneRescueSim*> m_pcControllers (nbSpiri);
    std::string str;
 
 
@@ -59,8 +58,8 @@ bool MapLoopFunctions::IsExperimentFinished() {
       // get the associated entity
       m_pcESpiri[j] = dynamic_cast<CSpiriEntity*>(&GetSpace().GetEntity(str));
       // get the associated controller
-      m_pcControllers[j] = &dynamic_cast<CBuzzControllerDroneRescueSim&>(m_pcESpiri[j]->GetControllableEntity().GetController());
-      if (m_pcControllers[j]->DetectTargets() > 0) {
+      m_pcControllers[j] = &dynamic_cast<buzz_drone_rescue_sim::CBuzzControllerDroneRescueSim&>(m_pcESpiri[j]->GetControllableEntity().GetController());
+      if (m_pcControllers[j]->experiment_done) {
          return true;
       }
    }

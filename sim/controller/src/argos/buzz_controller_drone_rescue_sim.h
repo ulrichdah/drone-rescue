@@ -48,6 +48,7 @@ public:
 
    void LogFoundTarget(const int& step, const int& id);
 
+   bool experiment_done;
 protected:
 
    virtual buzzvm_state RegisterFunctions();

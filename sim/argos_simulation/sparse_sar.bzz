@@ -194,6 +194,14 @@ function root_state() {
     }
   }
 
+  if (size(found_targets) == 3 and size(current_target) == 0) {
+    if (state_duration > 10) {
+      experiment_done()
+    } else {
+      state_duration = state_duration + 1
+    }
+  }
+
   # Create stack points for Networkers
   if (size(current_target) != 0) {
     log("CURRENT TARG: ", current_target.x, ", ", current_target.y)
@@ -246,6 +254,7 @@ function auctionner_state() {
     log("[", id, "] Winner ACK", winner_id, "Cur_bid", current_best_bid.rid)
       winners_acks[cur_bid_info.id_bid] = winner_id
       if (current_state == STATE_AUCTIONEER) {
+        state_duration = 0
         current_state = STATE_ROOT
         log("---- Back from auction ----")
         cur_bid_info.position = {}
