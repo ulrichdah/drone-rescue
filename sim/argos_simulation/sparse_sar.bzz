@@ -59,7 +59,7 @@ function init() {
   show_colored_trajectory(NUMBER_OF_ROBOTS)
 
   # Set first search position
-  sample_next_position()
+  sample_next_position(1)
 
   # Set initial state
   current_state = STATE_SEARCH
@@ -125,6 +125,7 @@ function found_state() {
   neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
     if (value == id) {
       neighbors.ignore(NEW_TARGET_ACK_EVENT)
+      sample_next_position(1)
       move_to_search_state()
     }
   })
@@ -170,8 +171,8 @@ function root_state() {
 
   var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
   if (root_id != id) {
-    current_state =  STATE_SEARCH
-    search()
+    sample_next_position(1)
+    move_to_search_state()
     neighbors.ignore(NEW_TARGET_EVENT)
     neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
     neighbors.ignore(BIDDING_VALUE_EVENT)
@@ -305,6 +306,7 @@ function meeting_state() {
   }
   # When we get to the meeting point go back to searching when no networkers are needed
   else {
+    sample_next_position(1)
     move_to_search_state()
   }
 }
@@ -351,6 +353,7 @@ function networker_bidding_state() {
 function wait_for_bid_state() {
   debug.print("Waiting for bid")
   if (state_duration > 10) {
+    sample_next_position(1)
     move_to_search_state()
     state_duration = 0
   } else {
