@@ -1,4 +1,5 @@
 #include "map_loop_functions.h"
+#include "buzz_controller_drone_rescue_sim.h"
 #include "belief_map.h"
 #include <argos3/plugins/simulator/entities/box_entity.h>
 #include <iostream>
@@ -38,6 +39,32 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
                                  1);                        // the mass in kg
    water->SetColor(CVector3(1.0, 0.0, 0.0), 0.5f);
    AddEntity(*water);
+}
+
+bool MapLoopFunctions::IsExperimentFinished() {
+   CSpace::TMapPerType& spiriMap = *(&GetSpace().GetEntitiesByType("spiri"));
+   int nbSpiri = spiriMap.size();
+
+   std::vector<CSpiriEntity*> m_pcESpiri (nbSpiri);
+   std::vector<CBuzzControllerDroneRescueSim*> m_pcControllers (nbSpiri);
+   std::string str;
+
+
+   int j;
+   CSpace::TMapPerType::iterator it;
+   for(it=spiriMap.begin(), j=0; it != spiriMap.end(); ++it, ++j)
+   {
+      // get the current spiri's id
+      str = it->first;
+      // get the associated entity
+      m_pcESpiri[j] = dynamic_cast<CSpiriEntity*>(&GetSpace().GetEntity(str));
+      // get the associated controller
+      m_pcControllers[j] = &dynamic_cast<CBuzzControllerDroneRescueSim&>(m_pcESpiri[j]->GetControllableEntity().GetController());
+      if (m_pcControllers[j]->DetectTargets() > 0) {
+         return true;
+      }
+   }
+   return false;
 }
 
 void MapLoopFunctions::AddBeliefBox(const CVector3& position, const CVector3& color){
