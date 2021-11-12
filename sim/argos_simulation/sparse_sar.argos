@@ -75,10 +75,10 @@
         </foot-bot>
       </entity>
     </distribute> -->
-    <!-- <foot-bot id="fb_0">
+    <foot-bot id="fb_0">
       <body position="0,-5,0" orientation="0,0,0" />
       <controller config="target_controller"/>
-    </foot-bot> -->
+    </foot-bot>
     <foot-bot id="fb_1">
       <body position="9,9,0" orientation="0,0,0" />
       <controller config="target_controller"/>
@@ -92,8 +92,8 @@
     <distribute>
       <position method="uniform" min="-10,-12,0" max="10,-10,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="3" max_trials="100">
-        <spiri id="sp" rab_range="120" rab_data_size="100000">
+      <entity quantity="15" max_trials="100">
+        <spiri id="sp" rab_range="7" rab_data_size="100000">
           <controller config="drone_controller" />
         </spiri>
       </entity>

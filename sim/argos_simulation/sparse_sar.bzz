@@ -1,6 +1,5 @@
 include "buzz_includes/buzz_utils/vec2.bzz"
 include "config/search_example/parameters.bzz"
-include "buzz_includes/search_example/utils.bzz"
 include "buzz_includes/search_example/belief_search.bzz"
 include "buzz_includes/debug.bzz"
 
@@ -61,8 +60,7 @@ function init() {
   show_colored_trajectory(NUMBER_OF_ROBOTS)
 
   # Set first search position
-  next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
-  next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
+  sample_next_position()
 
   # Set initial state
   current_state = STATE_SEARCH
@@ -155,15 +153,19 @@ function safe_stigmergy_get(v_stigmergy, key, default) {
   }
 }
 
+function move_to_found_state() {
+  update_belief(0)
+  found_gps.x = gps_position.x
+  found_gps.y = gps_position.y
+  current_search_step = 0  
+  current_state = STATE_FOUND
+}
+
 function search_state() {
   debug.print("Searching")
   # Look if a target is discovered
   if ( has_discovered_target() != 0 ) { 
-    update_belief(0)
-    found_gps.x = gps_position.x
-    found_gps.y = gps_position.y
-    current_state = STATE_FOUND
-    current_search_step = 0      
+    move_to_found_state()    
   } 
   # If the max number of search step is reached go back to meeting point
   else if ( current_search_step >= NUMBER_OF_SEARCH_STEP ){ 
@@ -359,21 +361,14 @@ function meeting_state() {
   if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
     # Look for targets when comming back to meeting point
     if ( has_discovered_target() != 0 ) { 
-      update_belief(0)
-      found_gps.x = gps_position.x
-      found_gps.y = gps_position.y
-      current_state = STATE_FOUND
-      current_search_step = 0      
+      move_to_found_state()     
     } else {
       update_belief(0)
     }
   }
   # When we get to the meeting point go back to searching when no networkers are needed
   else {
-    found_target_info = { .found_by = -1, .x = 0.0, .y = 0.0 }
-    next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
-    next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
-    goto(next_position.x, next_position.y)
+    search()
     current_state = STATE_SEARCH
   }
 }
@@ -447,6 +442,7 @@ function step() {
   update_gps_position()
   nb_step = nb_step + 1
   
+  # Get latest targets list
   found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   
   if (current_state == STATE_SEARCH) { 

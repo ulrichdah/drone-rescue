@@ -1,9 +1,14 @@
+include "buzz_includes/search_example/global_variables.bzz"
 
-# Random walk search
-function random_search()
-{ 
+# Sample a random position
+function sample_next_position() {
   next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
   next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
+}
+
+# Random walk search
+function random_search() { 
+  sample_next_position()
   goto(next_position.x, next_position.y)
 }
 
