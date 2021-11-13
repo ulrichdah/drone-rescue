@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="100"
+    <experiment length="150"
                 ticks_per_second="5" />
     <!--profiling file="profile.txt"
              format="human_readable"
@@ -66,27 +66,39 @@
     </box>
 
     <!-- * Initial targets positions * -->
-    <!-- <distribute>
-      <position method="uniform" min="-10,-10,0" max="10,10,0" />
+    <distribute>
+      <position method="uniform" min="-10,-10,0" max="10,-7,0" />
+      <!-- <position method="uniform" min="-15,-15,0" max="15,-8,0" /> -->
+      <!-- <position method="uniform" min="-20,-20,0" max="20,-10,0" /> -->
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="2" max_trials="100">
-        <foot-bot id="fb" rab_range="1000000">
+      <entity quantity="1" max_trials="100">
+        <foot-bot id="fb0" rab_range="1000000">
           <controller config="target_controller"/>
         </foot-bot>
       </entity>
-    </distribute> -->
-    <foot-bot id="fb_0">
-      <body position="0,-5,0" orientation="0,0,0" />
-      <controller config="target_controller"/>
-    </foot-bot>
-    <foot-bot id="fb_1">
-      <body position="9,9,0" orientation="0,0,0" />
-      <controller config="target_controller"/>
-    </foot-bot>
-    <foot-bot id="fb_2">
-      <body position="-6,7,0" orientation="0,0,0" />
-      <controller config="target_controller"/>
-    </foot-bot>
+    </distribute>
+    <distribute>
+      <position method="uniform" min="-10,-2,0" max="10,1,0" />
+      <!-- <position method="uniform" min="-15,-3,0" max="15,4,0" /> -->
+      <!-- <position method="uniform" min="-20,-5,0" max="20,5,0" /> -->
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+      <entity quantity="1" max_trials="100">
+        <foot-bot id="fb1" rab_range="1000000">
+          <controller config="target_controller"/>
+        </foot-bot>
+      </entity>
+    </distribute>
+    <distribute>
+      <position method="uniform" min="-10,6,0" max="10,10,0" />
+      <!-- <position method="uniform" min="-15,9,0" max="15,15,0" /> -->
+      <!-- <position method="uniform" min="-20,10,0" max="20,20,0" /> -->
+      <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
+      <entity quantity="1" max_trials="100">
+        <foot-bot id="fb2" rab_range="1000000">
+          <controller config="target_controller"/>
+        </foot-bot>
+      </entity>
+    </distribute>
 
     <!-- * Initial drones positions * -->
     <distribute>
@@ -123,7 +135,7 @@
   <visualization>
     <qt-opengl>
       <camera>
-        <placement idx="0" position="0,0,100" look_at="0,0,0" up="-1,0,0" lens_focal_length="134" />
+        <placement idx="0" position="0,0,100" look_at="0,0,0" up="-1,0,0" lens_focal_length="65" />
       </camera>
        <frame_grabbing directory="/home/docker/drone-rescue/sim/argos_simulation/log/"
                        base_name="frame_" 
