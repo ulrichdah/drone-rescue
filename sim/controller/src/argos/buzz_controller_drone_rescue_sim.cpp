@@ -17,7 +17,7 @@ const std::string RELAY_FILE = "/home/docker/drone-rescue/sim/controller/src/arg
 /****************************************/
 
 CBuzzControllerDroneRescueSim::CBuzzControllerDroneRescueSim() : CBuzzControllerSpiri() {
-   
+   random_engine_.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count());
    experiment_done = false;
 }
 
@@ -32,12 +32,6 @@ CBuzzControllerDroneRescueSim::~CBuzzControllerDroneRescueSim() {
 
 void CBuzzControllerDroneRescueSim::Init(TConfigurationNode& t_node)  {
    CBuzzControllerSpiri::Init(t_node);
-   std::chrono::high_resolution_clock::time_point previous = 
-      std::chrono::high_resolution_clock::now();
-   usleep(10);
-   std::chrono::high_resolution_clock::duration duration(
-      std::chrono::high_resolution_clock::now() -  previous);
-   random_engine_.seed(duration.count() + m_pcPos->GetReading().Position.GetX());
    m_pcCamera->Enable();
    belief_map_ = BeliefMap("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
 }
