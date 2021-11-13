@@ -35,12 +35,12 @@ void CBuzzControllerTargetSim::Init(TConfigurationNode& t_node)  {
    std::vector<std::pair<int, int>> robots_position;
    robots_position.push_back(std::make_pair( position.GetX(), position.GetY()) );
 
-   std::ifstream f("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
+   std::ifstream f("/home/docker/drone-rescue/sim/sample_maps/fake1.txt");
    if (f.good()) {
-      BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30, "/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
+      BeliefMap::CreateFakeBeliefMap(robots_position, 40, 40, "/home/docker/drone-rescue/sim/sample_maps/fake1.txt");
    }
    else {
-      BeliefMap::CreateFakeBeliefMap(robots_position, 30, 30);
+      BeliefMap::CreateFakeBeliefMap(robots_position, 40, 40);
    }
 }
 

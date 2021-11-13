@@ -17,7 +17,7 @@ void MapLoopFunctions::Init(TConfigurationNode& t_tree) {
    AddEntity(*grass);
    
    // Draw belief map
-   BeliefMap belief_map("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
+   BeliefMap belief_map("/home/docker/drone-rescue/sim/sample_maps/fake1.txt");
    float world_offset_x = - belief_map.GetSizeX()/2 - 0.5;
    float world_offset_y = - belief_map.GetSizeY()/2 - 0.5;
    for (int i = 0; i < belief_map.GetSizeX(); i++)

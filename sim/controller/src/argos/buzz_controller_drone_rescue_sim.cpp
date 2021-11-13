@@ -33,7 +33,7 @@ CBuzzControllerDroneRescueSim::~CBuzzControllerDroneRescueSim() {
 void CBuzzControllerDroneRescueSim::Init(TConfigurationNode& t_node)  {
    CBuzzControllerSpiri::Init(t_node);
    m_pcCamera->Enable();
-   belief_map_ = BeliefMap("/home/docker/drone-rescue/sim/sample_maps/fake0.txt");
+   belief_map_ = BeliefMap("/home/docker/drone-rescue/sim/sample_maps/fake1.txt");
 }
 
 /****************************************/
