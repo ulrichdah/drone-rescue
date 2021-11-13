@@ -92,7 +92,7 @@ function move_to_search_state() {
 }
 
 function search_state() {
-  debug.print("Searching")
+  # debug.print("Searching")
   # Look if a target is discovered
   if ( has_discovered_target() != 0 ) { 
     move_to_found_state()    
@@ -119,7 +119,7 @@ function search_state() {
 }
 
 function found_state() {
-  debug.print("Found the target")
+  # debug.print("Found the target")
 
   # Wait for ack from root if exists before leaving this state
   neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
@@ -130,7 +130,7 @@ function found_state() {
   })
 
   if (is_new_target(found_gps) != 0) {
-    log("[", id, "] New target")
+    # log("[", id, "] New target")
     var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
     # Go to meeting zone if not there already
     if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0) {
@@ -152,7 +152,7 @@ function found_state() {
 }
 
 function root_state() {
-  debug.print("Root")
+  # debug.print("Root")
 
   neighbors.ignore(NETWORKERS_NEEDED_EVENT)
   # Listen to broadcast for new_target
@@ -169,7 +169,7 @@ function root_state() {
     }
   })
 
-  log("Number target = ", size(found_targets))
+  # log("Number target = ", size(found_targets))
 
   var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
   if (root_id != id) {
@@ -183,7 +183,7 @@ function root_state() {
 
   # Process next target
   if (size(current_target) == 0) {
-    log("NO CURRENT TARGET")
+    # log("NO CURRENT TARGET")
     var i = 0
     var continue = 1
     while(i < size(found_targets) and continue == 1) {
@@ -206,9 +206,9 @@ function root_state() {
 
   # Create stack points for Networkers
   if (size(current_target) != 0) {
-    log("CURRENT TARG: ", current_target.x, ", ", current_target.y)
+    # log("CURRENT TARG: ", current_target.x, ", ", current_target.y)
     if (size(networkers_positions) == 0) {
-      log("NO NETWORKERS LIST")
+      # log("NO NETWORKERS LIST")
       networkers_positions = get_networkers_positions(current_target)
       initial_nb_networkers = size(networkers_positions)
     }
@@ -229,7 +229,7 @@ function root_state() {
       }
       # No more positions for this target
       if (size(networkers_positions) == 0) {
-        log("Processed")
+        # log("Processed")
         current_target = {}
         initial_nb_networkers = -1
       }
@@ -241,7 +241,7 @@ function root_state() {
 }
 
 function auctionner_state() {
-  debug.print("Auctioneer")
+  # debug.print("Auctioneer")
   # Listen to networker bid
   neighbors.listen(BIDDING_VALUE_EVENT, function(vid, info_bid, rid) {
     # get bid value
@@ -253,12 +253,12 @@ function auctionner_state() {
   # Listen to winner acknowledgment
   neighbors.listen(WINNER_ACK_EVENT, function(vid, winner_id, rid) {
     if (current_best_bid.rid == winner_id) {
-    log("[", id, "] Winner ACK", winner_id, "Cur_bid", current_best_bid.rid)
+    # log("[", id, "] Winner ACK", winner_id, "Cur_bid", current_best_bid.rid)
       winners_acks[cur_bid_info.id_bid] = winner_id
       if (current_state == STATE_AUCTIONEER) {
         state_duration = 0
         current_state = STATE_ROOT
-        log("---- Back from auction ----")
+        # log("---- Back from auction ----")
         cur_bid_info.position = {}
         count_broadcast_winner = 0
         count_broadcast = 0
@@ -282,10 +282,10 @@ function auctionner_state() {
     neighbors.ignore(BIDDING_VALUE_EVENT)
     if (count_broadcast_winner < MAX_BROADCAST_STEP) {
       neighbors.broadcast(BID_WINNER_EVENT, current_best_bid.rid)
-      log(" Winner is: ", current_best_bid.rid)
+      # log(" Winner is: ", current_best_bid.rid)
       count_broadcast_winner = count_broadcast_winner + 1
     } else {
-      log("Continue bidding")
+      # log("Continue bidding")
       cur_bid_info.id_bid = cur_bid_info.id_bid + 1
       count_broadcast_winner = 0
       count_broadcast = 0
@@ -295,7 +295,7 @@ function auctionner_state() {
 }
 
 function meeting_state() {
-  debug.print("Periodic meeting")
+  # debug.print("Periodic meeting")
   # Update local list of targets
   if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
     # Look for targets when comming back to meeting point
@@ -312,7 +312,7 @@ function meeting_state() {
 }
 
 function networker_bidding_state() {
-  debug.print("Networker bidding")
+  # debug.print("Networker bidding")
   # Listen to winner 
   neighbors.listen(BID_WINNER_EVENT, function(vid, winner_id, rid) {
     state_duration = 0
@@ -351,7 +351,7 @@ function networker_bidding_state() {
 }
 
 function wait_for_bid_state() {
-  debug.print("Waiting for bid")
+  # debug.print("Waiting for bid")
   if (state_duration > 10) {
     move_to_search_state()
     state_duration = 0
@@ -361,7 +361,7 @@ function wait_for_bid_state() {
 }
 
 function networker_state() {
-  debug.print("Networker (", cur_bid_info.position.x, ", ", cur_bid_info.position.y, ")")
+  # debug.print("Networker (", cur_bid_info.position.x, ", ", cur_bid_info.position.y, ")")
   if (state_duration < 5) {
     neighbors.broadcast(WINNER_ACK_EVENT, id)
     state_duration = state_duration + 1

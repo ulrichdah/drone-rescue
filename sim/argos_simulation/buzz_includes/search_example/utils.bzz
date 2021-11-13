@@ -83,16 +83,16 @@ function get_networkers_positions(target_position) {
   if (distance % COMMUNICATION_RANGE != 0) {
     nb_networkers = nb_networkers + 1
   }
-  log("Nb networker:", nb_networkers)
+  # log("Nb networker:", nb_networkers)
   var positions = {}
   for (i = 0, i < nb_networkers - 1, i = i + 1) {
     var new_pos = {.x = unit_direction.x * COMMUNICATION_RANGE * (i +1), .y = unit_direction.y * COMMUNICATION_RANGE * (i + 1)}
     positions[i] = math.vec2.add(start, new_pos)
     graph[size(graph)] = positions[i]
-    log("Networker", i, ":", positions[i].x, ", ", positions[i].y)
+    # log("Networker", i, ":", positions[i].x, ", ", positions[i].y)
   }
   positions[(nb_networkers - 1)] = target_position
-  log("Networker", (nb_networkers - 1), ":", positions[(nb_networkers - 1)].x, ", ", positions[(nb_networkers - 1)].y)
+  # log("Networker", (nb_networkers - 1), ":", positions[(nb_networkers - 1)].x, ", ", positions[(nb_networkers - 1)].y)
   graph[size(graph)] = target_position
   return positions
 }
