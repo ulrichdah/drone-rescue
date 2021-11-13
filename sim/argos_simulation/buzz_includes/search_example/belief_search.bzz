@@ -15,7 +15,7 @@ function get_best_belief(x, y) {
 
 # Random belief map search
 function random_belief_search() { 
-  sample_next_position(0)
+  sample_next_position()
   var nb_try = 0
   var candidate_belief = get_best_belief(next_position.x, next_position.y)
   var cur_best_belief = -INF_FLOAT
@@ -27,7 +27,7 @@ function random_belief_search() {
       cur_best_position.y = next_position.y
     }
     nb_try = nb_try + 1
-    sample_next_position(0)
+    sample_next_position()
     candidate_belief = get_best_belief(next_position.x, next_position.y)
   }
   goto(next_position.x, next_position.y)

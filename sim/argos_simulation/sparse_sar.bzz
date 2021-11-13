@@ -59,7 +59,7 @@ function init() {
   show_colored_trajectory(NUMBER_OF_ROBOTS)
 
   # Set first search position
-  sample_next_position(1)
+  sample_next_position()
 
   # Set initial state
   current_state = STATE_SEARCH
@@ -125,7 +125,6 @@ function found_state() {
   neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
     if (value == id) {
       neighbors.ignore(NEW_TARGET_ACK_EVENT)
-      sample_next_position(1)
       move_to_search_state()
     }
   })
@@ -164,6 +163,9 @@ function root_state() {
       # Add it to targets stack and update stigmergy
       found_targets[size(found_targets)] = {.processed = 0, .position = new_candidate}
       target_stigmergy.put("found_targets", found_targets)
+      if (size(found_targets) == NUMBER_OF_TARGETS) {
+        log_metrics(nb_step, STATE_FOUND)
+      }
     }
   })
 
@@ -171,7 +173,6 @@ function root_state() {
 
   var root_id = safe_stigmergy_get(root_id_stigmergy, "root_id", -1)
   if (root_id != id) {
-    sample_next_position(1)
     move_to_search_state()
     neighbors.ignore(NEW_TARGET_EVENT)
     neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
@@ -195,8 +196,8 @@ function root_state() {
     }
   }
 
-  if (size(found_targets) == 3 and size(current_target) == 0) {
-    if (state_duration > 10) {
+  if (size(found_targets) == NUMBER_OF_TARGETS and size(current_target) == 0) {
+    if (state_duration > 15) {
       experiment_done()
     } else {
       state_duration = state_duration + 1
@@ -306,7 +307,6 @@ function meeting_state() {
   }
   # When we get to the meeting point go back to searching when no networkers are needed
   else {
-    sample_next_position(1)
     move_to_search_state()
   }
 }
@@ -353,7 +353,6 @@ function networker_bidding_state() {
 function wait_for_bid_state() {
   debug.print("Waiting for bid")
   if (state_duration > 10) {
-    sample_next_position(1)
     move_to_search_state()
     state_duration = 0
   } else {
@@ -368,6 +367,10 @@ function networker_state() {
     state_duration = state_duration + 1
   } else {
     goto(cur_bid_info.position.x, cur_bid_info.position.y)
+    if (has_reached(cur_bid_info.position.x, cur_bid_info.position.y, DELTA_REACHED_POS) == 1 and waiting_log == 1) {
+      log_metrics(nb_step, STATE_NETWORKER)
+      waiting_log = 0
+    }
   }
 }
 

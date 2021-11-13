@@ -2,19 +2,14 @@ include "buzz_includes/search_example/global_variables.bzz"
 include "buzz_includes/buzz_utils/vec2.bzz"
 
 # Sample a random position
-function sample_next_position(global) {
-  if (global == 1) {
-    next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
-    next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
-  } else {
-    next_position.x = uniform(math.max(next_position.x-SEARCH_SPEED, SEARCH_SPACE.minx), math.min(next_position.x+SEARCH_SPEED, SEARCH_SPACE.maxx))
-    next_position.y = uniform(math.max(next_position.y-SEARCH_SPEED, SEARCH_SPACE.miny), math.min(next_position.y+SEARCH_SPEED, SEARCH_SPACE.maxy))
-  }
+function sample_next_position() {
+  next_position.x = uniform(SEARCH_SPACE.minx, SEARCH_SPACE.maxx)
+  next_position.y = uniform(SEARCH_SPACE.miny, SEARCH_SPACE.maxy)
 }
 
 # Random walk search
 function random_search() { 
-  sample_next_position(0)
+  sample_next_position()
   goto(next_position.x, next_position.y)
 }
 
@@ -31,7 +26,7 @@ function round_to_nearest(value) {
 function log_metrics(step, state) {
   if (state == STATE_FOUND) {
     log_found_target(step, id)
-  } else if (state == STATE_RELAY) {
+  } else if (state == STATE_NETWORKER) {
     log_relay(step, id)
   }
 }
