@@ -1,5 +1,6 @@
 include "buzz_includes/search_example/global_variables.bzz"
 include "buzz_includes/buzz_utils/vec2.bzz"
+include "buzz_includes/debug.bzz"
 
 # Sample a random position
 function sample_next_position() {
@@ -28,6 +29,12 @@ function log_metrics(step, state) {
     log_found_target(step, id)
   } else if (state == STATE_NETWORKER) {
     log_relay(step, id)
+  } else if (debug.msgqueue != nil) {
+    if (current_state == STATE_ROOT or current_state == STATE_AUCTIONEER) {
+      log_datasize(step, -1, debug.msgqueue.total)
+    } else {
+      log_datasize(step, id, debug.msgqueue.total)
+    }
   }
 }
 

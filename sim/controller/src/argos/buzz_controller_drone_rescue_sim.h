@@ -48,6 +48,8 @@ public:
 
    void LogFoundTarget(const int& step, const int& id);
 
+   void LogDatasize(const int& step, const int& id, const int& datasize);
+
    bool experiment_done;
 protected:
 

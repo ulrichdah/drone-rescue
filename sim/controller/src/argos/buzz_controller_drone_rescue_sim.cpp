@@ -12,6 +12,7 @@ namespace buzz_drone_rescue_sim {
 
 const std::string TARGET_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/target_4040_10_random.txt";
 const std::string RELAY_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/relay_4040_10_random.txt";
+const std::string DATASIZE_FILE = "/home/docker/drone-rescue/sim/controller/src/argos/results/datasize_4040_10_random.txt";
 
 /****************************************/
 /****************************************/
@@ -115,6 +116,17 @@ void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id){
    result_file.open(RELAY_FILE, std::ios::out | std::ios::app);
 
    result_file << step << "," << id << std::endl;
+}
+
+void CBuzzControllerDroneRescueSim::LogDatasize(const int& step, const int& id, const int& datasize) {
+   std::ofstream result_file;
+   result_file.open(DATASIZE_FILE, std::ios::out | std::ios::app);
+
+   if (id == -1)
+      result_file << step << "," << datasize << "," << "ROOT" << std::endl;
+   else
+      result_file << step << "," << datasize << "," << id << std::endl;
+
 }
 
 }

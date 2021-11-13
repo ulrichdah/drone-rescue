@@ -348,6 +348,49 @@ static int BuzzLogRelay(buzzvm_t vm) {
    return buzzvm_ret0(vm);
 }
 
+static int BuzzLogDatasize(buzzvm_t vm) {
+   /* Push the vector components */
+   buzzvm_lload(vm, 1);
+   buzzvm_lload(vm, 2);
+   buzzvm_lload(vm, 3);
+
+   int step;
+   int id;
+   int datasize;
+   buzzobj_t tstep = buzzvm_stack_at(vm, 3);
+   buzzobj_t tid = buzzvm_stack_at(vm, 2);
+   buzzobj_t tdatasize = buzzvm_stack_at(vm, 1);
+   id = tid->i.value;
+   if(tstep->o.type == BUZZTYPE_INT) step = tstep->i.value;
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "log_relay(step, id): expected %s, got %s in second argument",
+                      buzztype_desc[BUZZTYPE_INT],
+                      buzztype_desc[tstep->o.type]
+         );
+      return vm->state;
+   }
+   if(tdatasize->o.type == BUZZTYPE_INT) datasize = tdatasize->i.value;
+   else {
+      buzzvm_seterror(vm,
+                      BUZZVM_ERROR_TYPE,
+                      "log_datasize(step, id, datasize): expected %s, got %s in third argument",
+                      buzztype_desc[BUZZTYPE_INT],
+                      buzztype_desc[tstep->o.type]
+         );
+      return vm->state;
+   }
+
+   /* Get pointer to the controller */
+   buzzvm_pushs(vm, buzzvm_string_register(vm, "controller", 1));
+   buzzvm_gload(vm);
+   /* Call function */
+   reinterpret_cast<CBuzzControllerDroneRescueSim*>(buzzvm_stack_at(vm, 1)->u.value)->LogDatasize(step, id, datasize);
+
+   return buzzvm_ret0(vm);
+}
+
 static int BuzzExperimentDone(buzzvm_t vm) {
 
    /* Get pointer to the controller */
@@ -404,6 +447,10 @@ buzzvm_state CBuzzControllerDroneRescueSim::RegisterFunctions() {
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_relay", 1));
    buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzLogRelay));
+   buzzvm_gstore(m_tBuzzVM);
+
+   buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "log_datasize", 1));
+   buzzvm_pushcc(m_tBuzzVM, buzzvm_function_register(m_tBuzzVM, BuzzLogDatasize));
    buzzvm_gstore(m_tBuzzVM);
 
    buzzvm_pushs(m_tBuzzVM, buzzvm_string_register(m_tBuzzVM, "experiment_done", 1));
