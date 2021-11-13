@@ -94,6 +94,7 @@ ARG CODE_UPDATE=unknown
 # Install Buzz
 RUN git clone https://github.com/lajoiepy/Buzz.git /home/docker/buzz
 RUN cd /home/docker/buzz &&\
+    git checkout bandwidth-log &&\
     mkdir build &&\
     cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug ../src &&\
