@@ -382,7 +382,7 @@ function step() {
   # Get latest targets list
   found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   # Log datasize info
-  log_metrics(nb_step, -1)
+  # log_metrics(nb_step, -1)
   
   if (current_state == STATE_SEARCH) { 
     search_state()
