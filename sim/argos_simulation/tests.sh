@@ -5,6 +5,7 @@ declare -a test_types=("2020_10_" "2020_15_" "2020_20_")
 nb_tests=30
 
 for test_type in "${test_types[@]}"
+    echo "========= Setting up test parameters ========="
     # Use the correct file name for the experiment
     sed -i "13s/target_.*/target_"$test_type"random.txt\"/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     sed -i "14s/relay_.*/target_"$test_type"random.txt\"/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
