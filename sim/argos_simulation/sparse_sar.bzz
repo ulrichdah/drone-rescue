@@ -164,7 +164,7 @@ function root_state() {
       found_targets[size(found_targets)] = {.processed = 0, .position = new_candidate}
       target_stigmergy.put("found_targets", found_targets)
       if (size(found_targets) == NUMBER_OF_TARGETS) {
-        log_metrics(nb_step, STATE_FOUND)
+        log_metrics(nb_step, STATE_FOUND, 0)
       }
     }
   })
@@ -368,7 +368,7 @@ function networker_state() {
   } else {
     goto(cur_bid_info.position.x, cur_bid_info.position.y)
     if (has_reached(cur_bid_info.position.x, cur_bid_info.position.y, DELTA_REACHED_POS) == 1 and waiting_log == 1) {
-      log_metrics(nb_step, STATE_NETWORKER)
+      log_metrics(nb_step, STATE_NETWORKER, cur_bid_info.last)
       waiting_log = 0
     }
   }
@@ -382,7 +382,7 @@ function step() {
   # Get latest targets list
   found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   # Log datasize info
-  # log_metrics(nb_step, -1)
+  # log_metrics(nb_step, -1, 0)
   
   if (current_state == STATE_SEARCH) { 
     search_state()

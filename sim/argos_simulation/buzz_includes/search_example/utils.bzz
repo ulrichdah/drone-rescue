@@ -24,11 +24,11 @@ function round_to_nearest(value) {
 }
 
 # Log metrics for results
-function log_metrics(step, state) {
+function log_metrics(step, state, last_networker) {
   if (state == STATE_FOUND) {
     log_found_target(step, id)
   } else if (state == STATE_NETWORKER) {
-    log_relay(step, id)
+    log_relay(step, id, last_networker)
   } else if (debug.msgqueue != nil) {
     if (current_state == STATE_ROOT or current_state == STATE_AUCTIONEER) {
       log_datasize(step, -1, debug.msgqueue.total)

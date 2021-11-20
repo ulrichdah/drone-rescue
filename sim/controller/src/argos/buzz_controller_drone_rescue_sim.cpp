@@ -110,12 +110,15 @@ void CBuzzControllerDroneRescueSim::LogFoundTarget(const int& step, const int& i
 /****************************************/
 /****************************************/
 
-void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id){
+void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id, const int& last_relay){
    
    std::ofstream result_file;
    result_file.open(RELAY_FILE, std::ios::out | std::ios::app);
-
-   result_file << step << "," << id << std::endl;
+   if (last_relay == 1) {
+      result_file << step << "," << id << "last" << std::endl;
+   } else {
+      result_file << step << "," << id << std::endl;
+   }
 }
 
 void CBuzzControllerDroneRescueSim::LogDatasize(const int& step, const int& id, const int& datasize) {

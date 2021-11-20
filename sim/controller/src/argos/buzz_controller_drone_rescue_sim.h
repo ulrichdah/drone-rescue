@@ -44,7 +44,7 @@ public:
 
    std::string GetCurrentKey();
 
-   void LogRelay(const int& step, const int& id);
+   void LogRelay(const int& step, const int& id, const int& last_relay);
 
    void LogFoundTarget(const int& step, const int& id);
 
