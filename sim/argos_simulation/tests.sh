@@ -1,7 +1,7 @@
 ## declare an array for the test suffixes
-# declare -a test_types=("4040_10_" "4040_15_" "4040_20_")
-# declare -a test_types=("3030_10_" "3030_15_" "3030_20_")
-declare -a test_types=("2020_10_" "2020_15_" "2020_20_")
+# declare -a test_types=("4040_20_" "4040_30_" "4040_40_")
+# declare -a test_types=("3030_20_" "3030_30_" "3030_40_")
+declare -a test_types=("2020_20_" "2020_30_" "2020_40_")
 nb_tests=30
 
 for test_type in "${test_types[@]}"; do
@@ -11,17 +11,17 @@ for test_type in "${test_types[@]}"; do
     sed -i "14s/relay_.*/relay_"$test_type"random.txt\";/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     
     # Use the correct number of robots
-    if [[ $test_type == *"_10_"* ]]; then
-        sed -i "107s/quantity=\".*\" /quantity=\"10\" /" sparse_sar.argos
-        sed -i "6s/.*/NUMBER_OF_ROBOTS = 10/" config/search_example/parameters.bzz
-    fi
-    if [[ $test_type == *"_15_"* ]]; then
-        sed -i "107s/quantity=\".*\" /quantity=\"15\" /" sparse_sar.argos
-        sed -i "6s/.*/NUMBER_OF_ROBOTS = 15/" config/search_example/parameters.bzz
-    fi
     if [[ $test_type == *"_20_"* ]]; then
         sed -i "107s/quantity=\".*\" /quantity=\"20\" /" sparse_sar.argos
         sed -i "6s/.*/NUMBER_OF_ROBOTS = 20/" config/search_example/parameters.bzz
+    fi
+    if [[ $test_type == *"_30_"* ]]; then
+        sed -i "107s/quantity=\".*\" /quantity=\"30\" /" sparse_sar.argos
+        sed -i "6s/.*/NUMBER_OF_ROBOTS = 30/" config/search_example/parameters.bzz
+    fi
+    if [[ $test_type == *"_40_"* ]]; then
+        sed -i "107s/quantity=\".*\" /quantity=\"40\" /" sparse_sar.argos
+        sed -i "6s/.*/NUMBER_OF_ROBOTS = 40/" config/search_example/parameters.bzz
     fi
 
     # Build
