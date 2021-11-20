@@ -12,10 +12,11 @@ TARGET_ID = "target_"
 RELAY_ID = "relay_"
 
 def print_usage():
-    print("This script takes the experiment ID (ex:target_2020), find all the needed result files\
- (with each line containing \"step,drone_id\"), and will create a statistical graph.")
+    print("This srcipt uses result files in the same directory as this one and produces 2 images: \
+     one for the target find time and one for the relay establishment time. The files should be named\
+     like: relay_2020_15_random.txt and target_2020_15_random.txt")
     print("")
-    print("Usage: results_summarize <experiment_ID>")
+    print("Usage: python3 results_summarize")
     exit()
 
 def check_all_files_exist(experiment_ID, file_list):
@@ -55,10 +56,10 @@ def get_target_relay_results(area_size):
                     if i >= len(relay_lines):
                         break
                     relay_line = relay_lines[i].rstrip()
-                if len(acc) == 0:
-                    relay_results[result_type].append(0)
-                else:
-                    relay_results[result_type].append(max(acc) if max(acc) > 0 else mean(relay_results[result_type]))
+                # if len(acc) == 0:
+                #     relay_results[result_type].append(0)
+                # else:
+                relay_results[result_type].append(max(acc))
     
     x_random = []
     y_random = []
@@ -107,7 +108,6 @@ def get_target_relay_results(area_size):
     results["e_relay_belief"] = e_belief_relay
     return results
 
-    # # TODO: ADD PLOT FOR RELAY
     # x_r = np.arange(len(x_random_relay))
     # x_b = np.arange(len(x_belief_relay))
     # width = 0.25  # the width of the bars
@@ -170,11 +170,11 @@ def plot(res, ax, title, is_target):
     ax.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
 
 if __name__ == '__main__':
-    # if sys.argv[1] == "-h":
-    #     print_usage()
-    # if len(sys.argv) != 3:
-    #     print("Error: Wrong arguments!")
-    #     print_usage()
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+        print_usage()
+    if len(sys.argv) != 1:
+        print("Error: Wrong arguments!")
+        print_usage()
     results_2020 = get_target_relay_results("2020")
     results_3030 = get_target_relay_results("3030")
     results_4040 = get_target_relay_results("4040")
