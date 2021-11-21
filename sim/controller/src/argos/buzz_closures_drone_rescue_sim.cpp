@@ -322,6 +322,7 @@ static int BuzzLogRelay(buzzvm_t vm) {
    /* Push the vector components */
    buzzvm_lload(vm, 1);
    buzzvm_lload(vm, 2);
+   buzzvm_lload(vm, 3);
 
    int step;
    int id;

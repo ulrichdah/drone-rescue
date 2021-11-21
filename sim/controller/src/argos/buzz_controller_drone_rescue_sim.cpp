@@ -114,8 +114,8 @@ void CBuzzControllerDroneRescueSim::LogRelay(const int& step, const int& id, con
    
    std::ofstream result_file;
    result_file.open(RELAY_FILE, std::ios::out | std::ios::app);
-   if (last_relay == 1) {
-      result_file << step << "," << id << "last" << std::endl;
+   if (last_relay == 0) {
+      result_file << step << "," << id << ", last" << std::endl;
    } else {
       result_file << step << "," << id << std::endl;
    }
