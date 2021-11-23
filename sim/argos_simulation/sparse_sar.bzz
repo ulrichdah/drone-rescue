@@ -92,7 +92,7 @@ function move_to_search_state() {
 }
 
 function search_state() {
-  # debug.print("Searching")
+  debug.print("Searching")
   # Look if a target is discovered
   if ( has_discovered_target() != 0 ) { 
     move_to_found_state()    
@@ -119,7 +119,7 @@ function search_state() {
 }
 
 function found_state() {
-  # debug.print("Found the target")
+  debug.print("Found the target")
 
   # Wait for ack from root if exists before leaving this state
   neighbors.listen(NEW_TARGET_ACK_EVENT, function(vid, value, rid) {
@@ -152,7 +152,7 @@ function found_state() {
 }
 
 function root_state() {
-  # debug.print("Root")
+  debug.print("Root")
 
   neighbors.ignore(NETWORKERS_NEEDED_EVENT)
   # Listen to broadcast for new_target
@@ -241,7 +241,7 @@ function root_state() {
 }
 
 function auctionner_state() {
-  # debug.print("Auctioneer")
+  debug.print("Auctioneer")
   # Listen to networker bid
   neighbors.listen(BIDDING_VALUE_EVENT, function(vid, info_bid, rid) {
     # get bid value
@@ -295,7 +295,7 @@ function auctionner_state() {
 }
 
 function meeting_state() {
-  # debug.print("Periodic meeting")
+  debug.print("Periodic meeting")
   # Update local list of targets
   if ( has_reached(MEETING_POINT.x, MEETING_POINT.y, DELTA_REACHED_POS) == 0 ) {
     # Look for targets when comming back to meeting point
@@ -312,7 +312,7 @@ function meeting_state() {
 }
 
 function networker_bidding_state() {
-  # debug.print("Networker bidding")
+  debug.print("Networker bidding")
   # Listen to winner 
   neighbors.listen(BID_WINNER_EVENT, function(vid, winner_id, rid) {
     state_duration = 0
@@ -351,7 +351,7 @@ function networker_bidding_state() {
 }
 
 function wait_for_bid_state() {
-  # debug.print("Waiting for bid")
+  debug.print("Waiting for bid")
   if (state_duration > 10) {
     move_to_search_state()
     state_duration = 0
@@ -361,7 +361,7 @@ function wait_for_bid_state() {
 }
 
 function networker_state() {
-  # debug.print("Networker (", cur_bid_info.position.x, ", ", cur_bid_info.position.y, ")")
+  debug.print("Networker (", cur_bid_info.position.x, ", ", cur_bid_info.position.y, ")")
   if (state_duration < 5) {
     neighbors.broadcast(WINNER_ACK_EVENT, id)
     state_duration = state_duration + 1
