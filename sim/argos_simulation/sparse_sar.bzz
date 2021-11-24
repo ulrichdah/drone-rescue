@@ -6,6 +6,7 @@ include "buzz_includes/debug.bzz"
 var found_gps
 var nb_step = 0
 var waiting_log = 1
+var start_auction = 0
 
 var cur_bid_info = {.position = {}, .id_bid = 0, .last = 0}
 var current_target = {}
@@ -177,6 +178,7 @@ function root_state() {
     neighbors.ignore(NEW_TARGET_EVENT)
     neighbors.broadcast(NEW_TARGET_EVENT, found_gps)
     neighbors.ignore(BIDDING_VALUE_EVENT)
+    neighbors.ignore(WINNER_ACK_EVENT)
     init_listeners()
     return
   }
@@ -236,6 +238,7 @@ function root_state() {
     }
     if (size(cur_bid_info.position) != 0) {
       current_state = STATE_AUCTIONEER 
+      start_auction = nb_step
     }
   }
 }
@@ -262,6 +265,7 @@ function auctionner_state() {
         cur_bid_info.position = {}
         count_broadcast_winner = 0
         count_broadcast = 0
+        log_metrics(nb_step - start_auction, STATE_NETWORKER, cur_bid_info.last)
         neighbors.ignore(WINNER_ACK_EVENT)
       }
     }
@@ -368,7 +372,7 @@ function networker_state() {
   } else {
     goto(cur_bid_info.position.x, cur_bid_info.position.y)
     if (has_reached(cur_bid_info.position.x, cur_bid_info.position.y, DELTA_REACHED_POS) == 1 and waiting_log == 1) {
-      log_metrics(nb_step, STATE_NETWORKER, cur_bid_info.last)
+      # log_metrics(nb_step, STATE_NETWORKER, cur_bid_info.last)
       waiting_log = 0
     }
   }
@@ -382,7 +386,7 @@ function step() {
   # Get latest targets list
   found_targets = safe_stigmergy_get(target_stigmergy, "found_targets", found_targets)
   # Log datasize info
-  # log_metrics(nb_step, -1, 0)
+  log_metrics(nb_step, -1, 0)
   
   if (current_state == STATE_SEARCH) { 
     search_state()
