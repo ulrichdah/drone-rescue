@@ -9,6 +9,7 @@ for test_type in "${test_types[@]}"; do
     # Use the correct file name for the experiment
     sed -i "13s/target_.*/target_"$test_type"random.txt\";/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     sed -i "14s/relay_.*/relay_"$test_type"random.txt\";/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
+    sed -i "15s/datasize_.*/datasize_"$test_type"random.txt\";/" ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     
     # Use the correct number of robots
     if [[ $test_type == *"_15_"* ]]; then
@@ -30,6 +31,7 @@ for test_type in "${test_types[@]}"; do
     echo "========= TEST $test_type ========="
     for i in $(seq $nb_tests); do
         echo '----' >> /home/docker/drone-rescue/sim/controller/src/argos/results/relay_"$test_type"random.txt
+        echo '----' >> /home/docker/drone-rescue/sim/controller/src/argos/results/datasize_"$test_type"random.txt
         argos3 -c sparse_sar.argos
         git checkout ../sample_maps/fake1.txt
         # nlines=`wc --lines < ../controller/src/argos/results/target_"$test_type"random.txt`
@@ -45,9 +47,11 @@ for test_type in "${test_types[@]}"; do
     sed -i '11s/0/1/' config/search_example/parameters.bzz
     sed -i '13s/random/belief/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     sed -i '14s/random/belief/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
+    sed -i '15s/random/belief/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     cd ../controller/build/ && make clean && make && make install && cd ../../argos_simulation && rm sparse_sar.bdb sparse_sar.bo target_drift_example.bdb target_drift_example.bo && bzzc sparse_sar.bzz && bzzc target_drift_example.bzz
     for i in $(seq $nb_tests); do
         echo '----' >> /home/docker/drone-rescue/sim/controller/src/argos/results/relay_"$test_type"belief.txt
+        echo '----' >> /home/docker/drone-rescue/sim/controller/src/argos/results/datasize_"$test_type"belief.txt
         argos3 -c sparse_sar.argos
         git checkout ../sample_maps/fake1.txt
         echo "EXPERIMENT $i done!\n"
@@ -57,5 +61,6 @@ for test_type in "${test_types[@]}"; do
     sed -i '11s/1/0/' config/search_example/parameters.bzz
     sed -i '13s/belief/random/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     sed -i '14s/belief/random/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
+    sed -i '15s/belief/random/' ../controller/src/argos/buzz_controller_drone_rescue_sim.cpp
     cd ../controller/build/ && make clean && make && make install && cd ../../argos_simulation && rm sparse_sar.bdb sparse_sar.bo target_drift_example.bdb target_drift_example.bo && bzzc sparse_sar.bzz && bzzc target_drift_example.bzz
 done 
