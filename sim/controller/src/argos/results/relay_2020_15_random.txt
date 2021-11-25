@@ -1,156 +1,147 @@
 ----
-26,10, last
-39,5, last
-141,1
-175,2, last
-196,7, last
+12,13, last
+15,13, last
+33,13
+12,13, last
 ----
-31,11, last
-77,12
-90,8, last
-173,1, last
+13,5, last
+12,5, last
+33,5
+12,5, last
 ----
-36,0
-52,14, last
-86,3, last
-95,5, last
+12,12, last
+33,12
+12,12, last
+12,12, last
 ----
-24,13, last
-37,2, last
-60,1, last
+33,9, last
+12,9, last
+12,9, last
 ----
-22,13, last
-40,0
-55,14, last
-69,8, last
+12,11, last
+12,11, last
+15,11, last
 ----
-25,2, last
-41,0, last
-77,6
-90,4, last
+12,13
+13,13, last
+12,13, last
+13,13, last
 ----
-39,2
-57,11
-70,1, last
-78,6, last
-110,0, last
+12,5, last
+37,5, last
+12,5, last
 ----
-28,10, last
-42,5, last
-60,7, last
+12,14, last
+12,14, last
+12,14
+12,14, last
 ----
-33,11
-50,14, last
-59,13, last
-144,8, last
+12,13, last
+12,13
+33,13, last
+12,13, last
 ----
-25,1, last
-40,14
-56,13, last
-68,9, last
+16,2, last
+12,2
+13,2, last
+12,2, last
 ----
-36,7
-48,2, last
-63,10
-77,1, last
-94,14, last
+12,7, last
+12,7
+12,7, last
+12,7, last
 ----
-38,7
-50,9, last
-77,1, last
-96,6, last
+12,2, last
+12,2, last
+13,2, last
 ----
-25,14, last
-59,5
-76,4, last
-106,2, last
+13,6, last
+14,6
+14,6, last
+15,6, last
 ----
-25,3, last
-38,6, last
-67,13
-80,9, last
+12,7, last
+12,7
+12,7, last
+12,7, last
 ----
-34,2
-51,5, last
-63,8, last
-76,13, last
+12,3, last
+12,3
+12,3, last
+13,3, last
 ----
-25,1, last
-40,3, last
-75,0, last
+12,6, last
+15,6
+12,6, last
+34,6, last
 ----
-28,1, last
-39,10, last
-77,5
-90,8, last
+12,6, last
+33,6
+12,6, last
+12,6
+12,6, last
 ----
-26,1, last
-41,3
-54,13, last
-227,5
-241,6, last
+13,1, last
+12,1
+33,1, last
+12,1, last
 ----
-26,11, last
-40,5
-54,2, last
-117,3, last
+13,10
+12,10, last
+13,10, last
+12,10, last
 ----
-32,9
-42,3, last
-62,10
-75,5, last
-127,13, last
+12,0, last
+12,0
+12,0, last
+13,0, last
 ----
-30,12
-45,1, last
-63,3, last
-121,2, last
+12,1, last
+12,1, last
+12,1
+12,1, last
 ----
-28,10, last
-45,9, last
-60,13
-72,3, last
+12,9, last
+12,9, last
+54,9
+12,9, last
 ----
-38,5
-49,8, last
-87,2
-100,1, last
-110,7, last
+12,14, last
+14,14, last
+12,14
+12,14, last
 ----
-27,12, last
-38,6
-57,14, last
-70,13
-83,0, last
+12,11, last
+12,11, last
+12,11
+12,11, last
 ----
-33,0
-50,2, last
-60,12, last
-93,4, last
+12,5
+16,5, last
+12,5, last
+14,5, last
 ----
-33,11
-49,9, last
-59,3, last
-76,8
-90,5, last
+12,11, last
+12,11
+12,11, last
+12,11
+13,11, last
 ----
-25,14, last
-78,2
-91,12, last
-107,11
-123,10, last
+14,9, last
+12,9
+12,9, last
+12,9
+13,9, last
 ----
-25,7, last
-45,2
-61,8, last
-99,9
-113,4, last
+18,5, last
+12,5, last
+12,5, last
 ----
-27,13, last
-40,1, last
-57,6, last
+12,2, last
+15,2, last
+12,2, last
 ----
-27,14, last
-41,8
-56,11, last
-66,6, last
+12,10, last
+12,10
+13,10, last
+12,10, last
