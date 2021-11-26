@@ -7,9 +7,10 @@ import math
 import glob
 from statistics import stdev, variance, mean
 
-result_types = ["_10_random.txt", "_15_random.txt", "_20_random.txt", "_10_belief.txt", "_15_belief.txt", "_20_belief.txt"]
+result_types = ["_15_random.txt", "_20_random.txt", "_25_random.txt", "_15_belief.txt", "_20_belief.txt", "_25_belief.txt"]
 TARGET_ID = "target_"
 RELAY_ID = "relay_"
+DATASIZE_ID = "datasize_"
 
 def print_usage():
     print("This srcipt uses result files in the same directory as this one and produces 2 images: \
@@ -51,7 +52,7 @@ def get_target_relay_results(area_size):
                 relay_line = relay_lines[i].rstrip()
                 while relay_line != '----':
                     relay_step = int(relay_line.split(',')[0])
-                    acc.append(relay_step - target_step)
+                    acc.append(relay_step)
                     i = i + 1
                     if i >= len(relay_lines):
                         break
@@ -59,7 +60,7 @@ def get_target_relay_results(area_size):
                 # if len(acc) == 0:
                 #     relay_results[result_type].append(0)
                 # else:
-                relay_results[result_type].append(max(acc))
+                relay_results[result_type].append(sum(acc))
     
     x_random = []
     y_random = []
@@ -108,46 +109,6 @@ def get_target_relay_results(area_size):
     results["e_relay_belief"] = e_belief_relay
     return results
 
-    # x_r = np.arange(len(x_random_relay))
-    # x_b = np.arange(len(x_belief_relay))
-    # width = 0.25  # the width of the bars
-
-    # fig, ax = plt.subplots()
-    # rects1 = ax.bar(x_r - width/2 - 0.025, y_random_relay, width, yerr=e_random_relay, capsize=2.5, align='center', alpha=0.8, label='random')
-    # rects2 = ax.bar(x_b + width/2 + 0.025, y_belief_relay, width, yerr=e_belief_relay, capsize=2.5, align='center', alpha=0.8, label='belief')
-
-    # ax.set_ylabel('Number of steps')
-    # ax.set_xlabel('Number of drones')
-    # # ax.set_title('Scores by group and gender')
-    # ax.set_xticks(x_r)
-    # ax.set_xticklabels(x_random_relay)
-    # ax.legend()
-
-    # fig.tight_layout()
-    # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
-    # # plt.savefig(sys.argv[2] + ".png")
-    # # plt.show()
-
-    # x_r = np.arange(len(x_random))
-    # x_b = np.arange(len(x_belief))
-    # width = 0.25  # the width of the bars
-
-    # fig, ax = plt.subplots()
-    # rects1 = ax.bar(x_r - width/2 - 0.025, y_random, width, yerr=e_random, capsize=2.5, align='center', alpha=0.8, label='random')
-    # rects2 = ax.bar(x_b + width/2 + 0.025, y_belief, width, yerr=e_belief, capsize=2.5, align='center', alpha=0.8, label='belief')
-
-    # ax.set_ylabel('Number of steps')
-    # ax.set_xlabel('Number of drones')
-    # # ax.set_title('Scores by group and gender')
-    # ax.set_xticks(x_r)
-    # ax.set_xticklabels(x_random)
-    # ax.legend()
-
-    # fig.tight_layout()
-    # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
-    # # plt.savefig(sys.argv[1] + ".png")
-    # # plt.show()
-
 def plot(res, ax, title, is_target):
     plot_type = "target" if is_target else "relay"
     x_rand = np.arange(len(res["x_" + plot_type + "_rand"]))
@@ -169,12 +130,51 @@ def plot(res, ax, title, is_target):
     ax.legend()
     ax.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
 
+def get_datasize_results(result_id):
+    cur_dir = os.getcwd()
+    file_list = os.listdir(cur_dir)
+    if DATASIZE_ID + result_id + ".txt" not in file_list:
+            print(DATASIZE_ID + result_id + " do not exist!")
+            exit()
+    datasize_results = {}
+    with open(DATASIZE_ID + result_id + ".txt") as file:
+            for line in file:
+                if "---" in line.rstrip():
+                    break
+                
+                step = int(line.rstrip().split(',')[0])
+                bandwidth = int(line.rstrip().split(',')[1])
+                r_id = line.rstrip().split(',')[2]
+                if r_id not in datasize_results:
+                    datasize_results[r_id] = {}
+                datasize_results[r_id][step] = bandwidth
+    return datasize_results
+
+def plot_datasize(result_id):
+    datasize_results = get_datasize_results(result_id)
+    futur_root = -1
+    min_len = float("inf")
+    for r_id in datasize_results:
+        if len(datasize_results[r_id]) < min_len:
+            min_len = len(datasize_results[r_id])
+            futur_root = r_id
+    datasize_results.pop(futur_root)
+    f, ax = plt.subplots(1)
+    for r_id in datasize_results:
+        ax.plot(np.array(list(datasize_results[r_id].keys())), np.array(list(datasize_results[r_id].values())), label=r_id)
+        # ax.set_ylim(ymin=0, ymax=500)
+        # ax.set_xlim(xmin=0)
+    plt.legend()
+    plt.show()
+
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == "-h":
         print_usage()
     if len(sys.argv) != 1:
         print("Error: Wrong arguments!")
         print_usage()
+    
+    # plot_datasize(sys.argv[1])
     results_2020 = get_target_relay_results("2020")
     results_3030 = get_target_relay_results("3030")
     results_4040 = get_target_relay_results("4040")
