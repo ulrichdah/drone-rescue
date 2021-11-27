@@ -137,10 +137,14 @@ def get_datasize_results(result_id):
             print(DATASIZE_ID + result_id + " do not exist!")
             exit()
     datasize_results = {}
+    stop = False
     with open(DATASIZE_ID + result_id + ".txt") as file:
             for line in file:
-                if "---" in line.rstrip():
+                if "---" in line.rstrip() and stop:
                     break
+                elif "---" in line.rstrip():
+                    stop = True
+                    continue
                 
                 step = int(line.rstrip().split(',')[0])
                 bandwidth = int(line.rstrip().split(',')[1])
@@ -151,54 +155,76 @@ def get_datasize_results(result_id):
     return datasize_results
 
 def plot_datasize(result_id):
-    datasize_results = get_datasize_results(result_id)
+    datasize_results_random = get_datasize_results(result_id + "_random")
+    datasize_results_belief = get_datasize_results(result_id + "_belief")
+
     futur_root = -1
     min_len = float("inf")
-    for r_id in datasize_results:
-        if len(datasize_results[r_id]) < min_len:
-            min_len = len(datasize_results[r_id])
+    for r_id in datasize_results_random:
+        if len(datasize_results_random[r_id]) < min_len:
+            min_len = len(datasize_results_random[r_id])
             futur_root = r_id
-    datasize_results.pop(futur_root)
-    f, ax = plt.subplots(1)
-    for r_id in datasize_results:
-        ax.plot(np.array(list(datasize_results[r_id].keys())), np.array(list(datasize_results[r_id].values())), label=r_id)
+    datasize_results_random.pop(futur_root)
+
+    futur_root = -1
+    min_len = float("inf")
+    for r_id in datasize_results_belief:
+        if len(datasize_results_belief[r_id]) < min_len:
+            min_len = len(datasize_results_belief[r_id])
+            futur_root = r_id
+    datasize_results_belief.pop(futur_root)
+
+    f, (ax_r, ax_b) = plt.subplots(1, 2)
+    for r_id in datasize_results_random:
+        ax_r.plot(np.array(list(datasize_results_random[r_id].keys())), np.array(list(datasize_results_random[r_id].values())), label=r_id)
+        ax_r.legend(loc='lower right')
+        ax_r.set_ylabel('Size of Buzz message queue (in bytes)')
+        ax_r.set_xlabel('Number of steps')
+        ax_r.set_title("Random", fontweight='bold')
+    
+    for r_id in datasize_results_belief:
+        ax_b.plot(np.array(list(datasize_results_belief[r_id].keys())), np.array(list(datasize_results_belief[r_id].values())), label=r_id)
+        ax_b.legend(loc='lower right')
+        ax_b.set_ylabel('Size of Buzz message queue (in bytes)')
+        ax_b.set_xlabel('Number of steps')
+        ax_b.set_title("Belief", fontweight='bold')
         # ax.set_ylim(ymin=0, ymax=500)
         # ax.set_xlim(xmin=0)
-    plt.legend()
+    # plt.legend()
     plt.show()
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == "-h":
         print_usage()
-    if len(sys.argv) != 1:
+    if len(sys.argv) != 2:
         print("Error: Wrong arguments!")
         print_usage()
     
-    # plot_datasize(sys.argv[1])
-    results_2020 = get_target_relay_results("2020")
-    results_3030 = get_target_relay_results("3030")
-    results_4040 = get_target_relay_results("4040")
-    all = [results_2020, results_3030, results_4040]
-    titles = ["(a) 20m x 20m", "(b) 30m x 30m", "(c) 40m x 40m"]
-    plt.rcParams['font.size'] = '8'
-    fig_t, (ax1_target, ax2_target, ax3_target) = plt.subplots(1, 3)
-    ax_t = [ax1_target, ax2_target, ax3_target]
+    plot_datasize(sys.argv[1])
+    # results_2020 = get_target_relay_results("2020")
+    # results_3030 = get_target_relay_results("3030")
+    # results_4040 = get_target_relay_results("4040")
+    # all = [results_2020, results_3030, results_4040]
+    # titles = ["(a) 20m x 20m", "(b) 30m x 30m", "(c) 40m x 40m"]
+    # plt.rcParams['font.size'] = '8'
+    # fig_t, (ax1_target, ax2_target, ax3_target) = plt.subplots(1, 3)
+    # ax_t = [ax1_target, ax2_target, ax3_target]
 
-    for i in range(len(all)):
-        plot(all[i], ax_t[i], titles[i], True)
+    # for i in range(len(all)):
+    #     plot(all[i], ax_t[i], titles[i], True)
 
-    fig_t.tight_layout()
-    # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
-    plt.savefig("target" + ".png")
+    # fig_t.tight_layout()
+    # # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+    # plt.savefig("target" + ".png")
 
-    fig_r, (ax1_relay, ax2_relay, ax3_relay) = plt.subplots(1, 3)
-    ax_r = [ax1_relay, ax2_relay, ax3_relay]
+    # fig_r, (ax1_relay, ax2_relay, ax3_relay) = plt.subplots(1, 3)
+    # ax_r = [ax1_relay, ax2_relay, ax3_relay]
 
-    for i in range(len(all)):
-        plot(all[i], ax_r[i], titles[i], False)
+    # for i in range(len(all)):
+    #     plot(all[i], ax_r[i], titles[i], False)
 
-    fig_r.tight_layout()
-    plt.savefig("relay" + ".png")
+    # fig_r.tight_layout()
+    # plt.savefig("relay" + ".png")
 
     # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
     # plt.show()
