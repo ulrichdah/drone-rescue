@@ -13,11 +13,16 @@ RELAY_ID = "relay_"
 DATASIZE_ID = "datasize_"
 
 def print_usage():
-    print("This srcipt uses result files in the same directory as this one and produces 2 images: \
-     one for the target find time and one for the relay establishment time. The files should be named\
-     like: relay_2020_15_random.txt and target_2020_15_random.txt")
     print("")
-    print("Usage: python3 results_summarize")
+    print("This srcipt uses result files in the same directory as this one and produces \n \
+     - RESULT TYPE 0: 2 images: one for the target find time and one for the relay establishment time. The files should be named\
+     like: relay_2020_15_random.txt and target_2020_15_random.txt\n \
+     - RESULT TYPE 1: an image of the bandwidth evolution for one experiment. The file should be named for example datasize_3030_25_random.txt.\
+     in that case the script is called with the file id: 3030_25_random\n \
+     - RESULT TYPE 2: an image for the field tests. The tests id should also be given: The files should be named target_<TEST_ID>_random.txt, etc.")
+    print("")
+    print("Usage: python3 results_summarize <RESULT_TYPE> <TEST_ID>")
+    print("<TEST_ID>: is only needed for result type 1 and 2.")
     exit()
 
 def check_all_files_exist(experiment_ID, file_list):
@@ -25,6 +30,90 @@ def check_all_files_exist(experiment_ID, file_list):
         if experiment_ID + result_type not in file_list:
             print(experiment_ID + result_type + "do not exist!")
             exit()
+
+def get_target_relay_results_from_id(test_id):
+    cur_dir = os.getcwd()
+    file_list = os.listdir(cur_dir)
+    file_ids = [test_id + "_random.txt", test_id + "_belief.txt"]
+    for f_id in file_ids:
+        if TARGET_ID + f_id not in file_list or RELAY_ID + f_id not in file_list:
+            print(f_id + " is missing!")
+            print_usage()
+    
+    results = {}
+    relay_results = {}
+    for f_id in file_ids:
+        results[f_id] = []
+        relay_results[f_id] = []
+        relay_lines = []
+        with open(RELAY_ID + f_id) as file:
+            for line in file:
+                relay_lines.append(line)
+        
+        with open(TARGET_ID + f_id) as file:
+            i = 0
+            for line in file:
+                target_step = int(line.rstrip().split(',')[0])
+                results[f_id].append(target_step)
+                # Start with second line
+                i = i + 1
+                acc = []
+                relay_line = relay_lines[i].rstrip()
+                while relay_line != '----':
+                    relay_step = int(relay_line.split(',')[0])
+                    acc.append(relay_step)
+                    i = i + 1
+                    if i >= len(relay_lines):
+                        break
+                    relay_line = relay_lines[i].rstrip()
+                relay_results[f_id].append(max(acc) - target_step)
+    x_random = []
+    y_random = []
+    e_random = []
+    x_belief = []
+    y_belief = []
+    e_belief = []
+    for f_id,values in results.items():
+        if "random" in f_id:
+            y_random.append(mean(values))
+            x_random.append(3)
+            e_random.append(stdev(values) if stdev(values) < mean(values) else mean(values))
+        elif "belief" in f_id:
+            y_belief.append(mean(values))
+            x_belief.append(3)
+            e_belief.append(stdev(values) if stdev(values) < mean(values) else mean(values))
+    
+    x_random_relay = []
+    y_random_relay = []
+    e_random_relay = []
+    x_belief_relay = []
+    y_belief_relay = []
+    e_belief_relay = []
+    for f_id,values in relay_results.items():
+        if "random" in f_id:
+            y_random_relay.append(mean(values))
+            x_random_relay.append(3)
+            e_random_relay.append(stdev(values))
+        elif "belief" in f_id:
+            y_belief_relay.append(mean(values))
+            x_belief_relay.append(3)
+            e_belief_relay.append(stdev(values))
+    results = {}
+    results["x_target_rand"] = x_random
+    results["x_target_belief"] = x_belief
+    results["y_target_rand"] = y_random
+    results["y_target_belief"] = y_belief
+    results["e_target_rand"] = e_random
+    results["e_target_belief"] = e_belief
+
+    results["x_relay_rand"] = x_random_relay
+    results["x_relay_belief"] = x_belief_relay
+    results["y_relay_rand"] = y_random_relay
+    results["y_relay_belief"] = y_belief_relay
+    results["e_relay_rand"] = e_random_relay
+    results["e_relay_belief"] = e_belief_relay
+    return results
+
 
 def get_target_relay_results(area_size):
     cur_dir = os.getcwd()
@@ -170,36 +259,49 @@ def plot_datasize(result_id):
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == "-h":
         print_usage()
-    if len(sys.argv) != 1:
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
         print("Error: Wrong arguments!")
         print_usage()
+
+    # 0: Simulation target and relay results (saved to 2 different files: relay.png and target.png); 
+    # 1: Simulation bandwidth plot (not saved); 
+    # 2: field tests results 
+    wanted_results = 2   
     
-    # plot_datasize(sys.argv[1])
-    results_2020 = get_target_relay_results("2020")
-    results_3030 = get_target_relay_results("3030")
-    results_4040 = get_target_relay_results("4040")
-    all = [results_2020, results_3030, results_4040]
-    titles = ["(a) 20m x 20m", "(b) 30m x 30m", "(c) 40m x 40m"]
-    plt.rcParams['font.size'] = '8'
-    fig_t, (ax1_target, ax2_target, ax3_target) = plt.subplots(1, 3)
-    ax_t = [ax1_target, ax2_target, ax3_target]
+    if wanted_results == 0:
+        results_2020 = get_target_relay_results("2020")
+        results_3030 = get_target_relay_results("3030")
+        results_4040 = get_target_relay_results("4040")
+        all = [results_2020, results_3030, results_4040]
+        titles = ["(a) 20m x 20m", "(b) 30m x 30m", "(c) 40m x 40m"]
+        plt.rcParams['font.size'] = '8'
+        fig_t, (ax1_target, ax2_target, ax3_target) = plt.subplots(1, 3)
+        ax_t = [ax1_target, ax2_target, ax3_target]
 
-    for i in range(len(all)):
-        plot(all[i], ax_t[i], titles[i], True)
+        for i in range(len(all)):
+            plot(all[i], ax_t[i], titles[i], True)
 
-    fig_t.tight_layout()
-    # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
-    plt.savefig("target" + ".png")
+        fig_t.tight_layout()
+        # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+        plt.savefig("target" + ".png")
 
-    fig_r, (ax1_relay, ax2_relay, ax3_relay) = plt.subplots(1, 3)
-    ax_r = [ax1_relay, ax2_relay, ax3_relay]
+        fig_r, (ax1_relay, ax2_relay, ax3_relay) = plt.subplots(1, 3)
+        ax_r = [ax1_relay, ax2_relay, ax3_relay]
 
-    for i in range(len(all)):
-        plot(all[i], ax_r[i], titles[i], False)
+        for i in range(len(all)):
+            plot(all[i], ax_r[i], titles[i], False)
 
-    fig_r.tight_layout()
-    plt.savefig("relay" + ".png")
+        fig_r.tight_layout()
+        plt.savefig("relay" + ".png")
 
-    # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
-    # plt.show()
+        # plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+        # plt.show()
+    elif wanted_results == 1:
+        plot_datasize(sys.argv[2])
+    elif wanted_results == 2:
+        results = get_target_relay_results_from_id(sys.argv[2])
+        fig_t, (ax_target, ax_relay) = plt.subplots(1, 2)
+        plot(results, ax_target, "Target discovery time", True)
+        plot(results, ax_relay, "Relay formation time", False)
+        plt.show()
     
